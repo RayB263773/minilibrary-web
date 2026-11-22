@@ -1,0 +1,4 @@
+/build/
+/minilibrary
+/compile-error.log
+.env
