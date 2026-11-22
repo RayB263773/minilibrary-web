@@ -5,7 +5,10 @@ int main()
     crow::SimpleApp app;
 
     CROW_ROUTE(app, "/api/books")( [] {
-        return "Minilibrary server is running!";
+        crow::json::wvalue result;
+        result["message"] = "Маршрут работaет";
+        result["books"] = crow::json::wvalue::list{};
+        return crow::response{result};
     });
     app.port(18080).run();
 }
