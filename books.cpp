@@ -1,4 +1,6 @@
 #include <pqxx/pqxx>
+#include <stdexcept>
+
 #include "books.h"
 
 std::vector<Book> get_all_books(const char* db_url) {

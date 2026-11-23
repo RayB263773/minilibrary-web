@@ -25,9 +25,9 @@ int main()
                 book_json["author"] = b.author;
                 book_json["year"] = b.year;
                 books_list.push_back(std::move(book_json));
+            }
             crow::json::wvalue result;
             result["books"] = std::move(books_list);
-            }
             return crow::response{result};
         } catch (const std::exception& e) {
             return crow::response(500, std::string("Ошибка: ") + e.what());
