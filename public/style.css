@@ -166,8 +166,7 @@ body {
     box-shadow: 0 0 22px rgba(245, 158, 11, 0.08);
 }
 
-input,
-textarea {
+input {
     background-color: #20232b;
     border: 1px solid #323642;
     color: #f3f4f6;
@@ -180,21 +179,11 @@ textarea {
     width: 100%;
 }
 
-textarea {
-    grid-column: 1 / -1;
-    resize: vertical;
-    min-height: 76px;
-    max-height: 280px;
-    line-height: 1.5;
-}
-
-input::placeholder,
-textarea::placeholder {
+input::placeholder {
     color: #6b7280;
 }
 
-input:focus,
-textarea:focus {
+input:focus {
     border-color: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
 }
@@ -229,6 +218,89 @@ textarea:focus {
 .add-btn:disabled {
     opacity: 0.6;
     cursor: wait;
+}
+
+/* Панель загрузки .txt файла на всю ширину формы */
+.file-upload-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background-color: #1b1e26;
+    border: 1px dashed #343946;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 2px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.file-upload-row.has-file {
+    border-style: solid;
+    border-color: rgba(245, 158, 11, 0.45);
+    background-color: rgba(245, 158, 11, 0.07);
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #262a35;
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.32);
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.file-label:hover {
+    background-color: #303543;
+    border-color: rgba(245, 158, 11, 0.55);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+.file-status {
+    font-size: 13px;
+    color: #9ca3af;
+    flex: 1;
+    min-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-upload-row.has-file .file-status {
+    color: #fde68a;
+    font-weight: 500;
+}
+
+.file-clear-btn {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.file-clear-btn:hover {
+    background-color: rgba(239, 68, 68, 0.24);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.file-upload-row.has-file .file-clear-btn {
+    display: inline-flex;
 }
 
 .search-box {
@@ -398,7 +470,6 @@ textarea:focus {
     border-radius: 6px;
 }
 
-/* Кнопка чтения книги */
 .read-btn {
     display: inline-flex;
     align-items: center;
@@ -460,11 +531,11 @@ textarea:focus {
     animation: cardSlideIn 0.25s ease both;
 }
 
-/* Модальное окно чтения книги */
+/* Модальное окно постраничной читалки */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(8, 9, 12, 0.78);
+    background-color: rgba(8, 9, 12, 0.8);
     backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
@@ -483,8 +554,9 @@ textarea:focus {
 
 .modal-window {
     width: 100%;
-    max-width: 680px;
-    max-height: 82vh;
+    max-width: 720px;
+    height: 82vh;
+    max-height: 760px;
     display: flex;
     flex-direction: column;
     background-color: #1a1c22;
@@ -505,17 +577,17 @@ textarea:focus {
 
 .modal-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 20px 24px;
+    padding: 18px 24px;
     border-bottom: 1px solid #2b2e37;
-    background-color: #16181e;
+    background-color: #15171c;
 }
 
 .modal-title-group h2 {
-    margin: 0 0 4px 0;
-    font-size: 20px;
+    margin: 0 0 3px 0;
+    font-size: 19px;
     color: #f9fafb;
     overflow-wrap: break-word;
 }
@@ -531,7 +603,7 @@ textarea:focus {
     color: #d1d5db;
     border: 1px solid #343846;
     border-radius: 8px;
-    padding: 6px 12px;
+    padding: 7px 14px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -542,24 +614,99 @@ textarea:focus {
 .modal-close-btn:hover {
     background-color: #303442;
     color: #ffffff;
-    border-color: rgba(245, 158, 11, 0.4);
+    border-color: rgba(245, 158, 11, 0.45);
 }
 
 .modal-body {
-    padding: 24px;
+    flex: 1;
+    padding: 26px 30px;
     overflow-y: auto;
-    font-size: 15px;
-    line-height: 1.75;
+    font-size: 16px;
+    line-height: 1.8;
     color: #e5e7eb;
     white-space: pre-wrap;
     overflow-wrap: break-word;
+    scrollbar-width: thin;
+    scrollbar-color: #383d4b #16181e;
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: #16181e;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background-color: #343946;
+    border-radius: 4px;
 }
 
 .modal-body.empty-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #9ca3af;
     font-style: italic;
     text-align: center;
-    padding: 44px 24px;
+}
+
+/* Нижняя панель переключения страниц в читалке */
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 24px;
+    border-top: 1px solid #2b2e37;
+    background-color: #15171c;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #252832;
+    color: #f3f4f6;
+    border: 1px solid #343846;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #2f3340;
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+input.page-input {
+    width: 64px;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #20232b;
+    border: 1px solid #343846;
+    color: #fbbf24;
+    border-radius: 6px;
 }
 
 /* Вкладка Info */
@@ -713,119 +860,13 @@ textarea:focus {
     .year-badge {
         margin-right: auto;
     }
-    /* Панель загрузки .txt файла */
-.file-upload-row {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    background-color: #1b1e26;
-    border: 1px dashed #383d4b;
-    border-radius: 8px;
-    padding: 8px 12px;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-}
 
-.file-upload-row.has-file {
-    border-style: solid;
-    border-color: rgba(245, 158, 11, 0.45);
-    background-color: rgba(245, 158, 11, 0.06);
-}
+    .modal-body {
+        padding: 18px;
+        font-size: 15px;
+    }
 
-.file-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background-color: #272b36;
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s;
-}
-
-.file-label:hover {
-    background-color: #313644;
-    border-color: rgba(245, 158, 11, 0.55);
-}
-
-.file-status {
-    font-size: 13px;
-    color: #9ca3af;
-    flex: 1;
-    min-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.file-clear-btn {
-    background: transparent;
-    color: #f87171;
-    border: none;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: none;
-}
-
-.file-upload-row.has-file .file-clear-btn {
-    display: inline-block;
-}
-
-/* Нижняя панель постраничной навигации в читалке */
-.modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 24px;
-    border-top: 1px solid #2b2e37;
-    background-color: #16181e;
-}
-
-.page-btn {
-    background-color: #252832;
-    color: #f3f4f6;
-    border: 1px solid #343846;
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s;
-}
-
-.page-btn:hover:not(:disabled) {
-    background-color: #303442;
-    border-color: rgba(245, 158, 11, 0.45);
-}
-
-.page-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
-
-.page-indicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #9ca3af;
-}
-
-.page-input {
-    width: 58px !important;
-    text-align: center;
-    padding: 4px 6px !important;
-    font-size: 13px !important;
-    font-weight: 600;
-}
+    .modal-footer {
+        padding: 12px 14px;
+    }
 }

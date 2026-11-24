@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css?v=4">
+    <link rel="stylesheet" href="/style.css?v=5">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
@@ -163,6 +163,7 @@
         const fileStatus = document.querySelector("#file-status");
         const fileClearBtn = document.querySelector("#file-clear");
         let loadedFileContent = "";
+        let autoFilledTitle = "";
 
         // Элементы читалки
         const readerModal = document.querySelector("#reader-modal");
@@ -202,26 +203,36 @@
 
             loadedFileContent = text;
             const sizeKb = Math.max(1, Math.round(file.size / 1024));
-            fileStatus.textContent = `${file.name} (${sizeKb} КБ)`;
+            fileStatus.textContent = `Выбран файл: ${file.name} (${sizeKb} КБ)`;
             fileRow.classList.add("has-file");
 
-            // Если поле названия пустое, подставляем имя файла без расширения
             const nameInput = document.querySelector("#name");
             if (!nameInput.value.trim()) {
-                nameInput.value = file.name.replace(/\.(txt|md)$/i, "");
+                autoFilledTitle = file.name.replace(/\.(txt|md)$/i, "");
+                nameInput.value = autoFilledTitle;
             }
         });
 
-        function clearFileSelection() {
+        function clearFileSelection(notify = false) {
             fileInput.value = "";
             loadedFileContent = "";
             fileStatus.textContent = "Файл не выбран (можно добавить книгу без текста)";
             fileRow.classList.remove("has-file");
+
+            const nameInput = document.querySelector("#name");
+            if (autoFilledTitle && nameInput.value === autoFilledTitle) {
+                nameInput.value = "";
+            }
+            autoFilledTitle = "";
+
+            if (notify) {
+                showToast("Прикрепленный файл сброшен");
+            }
         }
 
-        fileClearBtn.addEventListener("click", clearFileSelection);
+        fileClearBtn.addEventListener("click", () => clearFileSelection(true));
 
-        // Умная разбивка текста книги на страницы по абзацам и пробелам
+        // Умная разбивка текста книги на страницы
         function paginateText(text) {
             const clean = text.replace(/\r\n/g, "\n").trim();
             if (!clean) return [];
@@ -527,7 +538,7 @@
             });
 
             form.reset();
-            clearFileSelection();
+            clearFileSelection(false);
             submitBtn.disabled = false;
             showToast(`Добавлена книга «${book.name}»`);
             await loadBooks(true);
