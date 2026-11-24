@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minilibrary-Web</title>
+</head>
+<body>
+    <h1>Welcome to the Mini Library</h1>
+    <ul id="books"></ul> 
+    <script>
+        
+        async function loadBooks() {
+            const response = await fetch("/api/books");
+            const data = await response.json(); // превращает текст ответа в JS-объект
+            // теперь внутри data.books лежит твой массив книг из C++
+            const list = document.querySelector("#books");
+            for (const book of data.books) {
+                const item = document.createElement("li");
+                item.textContent = `${book.name} — ${book.author} (${book.year})`;
+                list.appendChild(item);
+            }
+        }
+        loadBooks();
+    </script>
+</body>
+</html>
