@@ -7,20 +7,55 @@
 </head>
 <body>
     <h1>Welcome to the Mini Library</h1>
+    <form id="book-form">
+        <input id="name" placeholder="Название книги" required>
+        <input id="author" placeholder="Автор" required>
+        <input id="year" type="number" placeholder="Год издания" required>
+        <button type="submit">Добавить</button>
+    </form>
     <ul id="books"></ul> 
     <script>
         
         async function loadBooks() {
-            const response = await fetch("/api/books");
-            const data = await response.json(); // превращает текст ответа в JS-объект
-            // теперь внутри data.books лежит твой массив книг из C++
+            // 1. Сначала находим список, затем очищаем его:
             const list = document.querySelector("#books");
+            list.replaceChildren();
+
+            const response = await fetch("/api/books");
+            const data = await response.json();
+
             for (const book of data.books) {
                 const item = document.createElement("li");
                 item.textContent = `${book.name} — ${book.author} (${book.year})`;
                 list.appendChild(item);
             }
-        }
+        } // <-- Здесь функция loadBooks() полностью заканчивается
+
+        // 2. Снаружи функции находим форму и сразу вешаем на неё обработчик:
+        const form = document.querySelector("#book-form");
+
+        form.addEventListener("submit", async (event) => {
+            // ... дальше весь твой код внутри обработчика без изменений ...
+            event.preventDefault();
+
+            // 1. Собираем данные из полей ввода в объект
+            const book = {
+                name: document.querySelector("#name").value,
+                author: document.querySelector("#author").value,
+                year: Number(document.querySelector("#year").value) // превращаем строку в число
+            };
+
+            // 2. Отправляем POST-запрос (аналог нашего curl -X POST)
+            await fetch("/api/books", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(book)
+            });
+
+            // 3. Очищаем поля формы и заново загружаем список книг
+            form.reset();
+            await loadBooks();
+            });
         loadBooks();
     </script>
 </body>
