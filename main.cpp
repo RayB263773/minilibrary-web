@@ -34,6 +34,25 @@ int main()
         }
     });
 
+    CROW_ROUTE(app, "/api/books").methods(crow::HTTPMethod::POST)( [db_url](const crow::request& req) {
+        try {
+            auto body = crow::json::load(req.body);
+            // Проверяем, что JSON корректный и все три поля присутствуют
+            if (!body || !body.has("name") || !body.has("author") || !body.has("year")) {
+                return crow::response(400, "Ошибка: нужны поля name, author и year");
+            }
+
+            std::string name = body["name"].s();
+            std::string author = body["author"].s();
+            int year = body["year"].i();
+            add_book(db_url, name, author, year);
+            return crow::response(201, "Книга успешно добавлена");
+        } catch (const std::exception& e) {
+            return crow::response(400, std::string("Ошибка: ") + e.what());
+        }
+
+    });
+
     CROW_ROUTE(app, "/")( []{
         crow::response res;
         res.set_static_file_info("public/index.html");

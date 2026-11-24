@@ -12,4 +12,6 @@ struct Book {
 };
 
 std::vector<Book> get_all_books(const char* db_url);
+
+void add_book(const char* db_url, const std::string &name, const std::string &author, int year);
 #endif // BOOKS_H
