@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css?v=5">
+    <link rel="stylesheet" href="/style.css?v=6">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
@@ -71,8 +71,8 @@
                     О веб-приложении Mini Library
                 </h2>
                 <p>
-                    Клиент-серверное приложение для управления личной библиотекой и постраничного чтения книг онлайн. 
-                    Серверная часть написана на C++20 с использованием микрофреймворка Crow и хранит данные в СУБД PostgreSQL.
+                    Клиент-серверное приложение с полным циклом операций CRUD для управления личной библиотекой и постраничного чтения книг онлайн. 
+                    Серверная часть написана на C++20 с использованием микрофреймворка Crow и СУБД PostgreSQL.
                 </p>
             </div>
 
@@ -103,12 +103,13 @@
                 <div class="info-card">
                     <div class="info-card-header">
                         <img width="24" height="24" src="https://img.icons8.com/fluency/48/api-settings.png" alt="api">
-                        <h3>Маршруты REST API</h3>
+                        <h3>Маршруты REST API (CRUD)</h3>
                     </div>
                     <ul>
-                        <li><code>GET /api/books</code> — метаданные всех книг</li>
+                        <li><code>GET /api/books</code> — список и поиск книг</li>
                         <li><code>GET /api/books/&lt;id&gt;</code> — подгрузка текста книги</li>
-                        <li><code>POST /api/books</code> — загрузка книги и <code>.txt</code></li>
+                        <li><code>POST /api/books</code> — добавление книги и <code>.txt</code></li>
+                        <li><code>PUT /api/books/&lt;id&gt;</code> — редактирование книги</li>
                         <li><code>DELETE /api/books/&lt;id&gt;</code> — удаление по ID</li>
                     </ul>
                 </div>
@@ -150,6 +151,48 @@
         </div>
     </div>
 
+    <!-- Модальное окно редактирования книги -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-window edit-modal-window">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2>Редактировать книгу</h2>
+                    <p class="modal-meta">Изменение данных и файла книги</p>
+                </div>
+                <button type="button" id="edit-close" class="modal-close-btn">Закрыть ✕</button>
+            </div>
+            <form id="edit-form" class="edit-form">
+                <div class="field-group">
+                    <label for="edit-name">Название книги</label>
+                    <input id="edit-name" required>
+                </div>
+                <div class="field-group">
+                    <label for="edit-author">Автор</label>
+                    <input id="edit-author" required>
+                </div>
+                <div class="field-group">
+                    <label for="edit-year">Год издания</label>
+                    <input id="edit-year" type="number" required>
+                </div>
+
+                <div id="edit-file-row" class="file-upload-row">
+                    <label for="edit-file" class="file-label">
+                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/upload--v1.png" alt="upload">
+                        Заменить текст (.txt)
+                    </label>
+                    <input id="edit-file" type="file" accept=".txt,.md" hidden>
+                    <span id="edit-file-status" class="file-status">Текущий текст книги сохранится</span>
+                    <button type="button" id="edit-file-clear" class="file-clear-btn">Сбросить ✕</button>
+                </div>
+
+                <div class="edit-actions">
+                    <button type="button" id="edit-cancel" class="modal-close-btn">Отмена</button>
+                    <button type="submit" id="edit-submit" class="add-btn">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script>
@@ -157,7 +200,7 @@
         const countBadge = document.querySelector("#book-count");
         const toastEl = document.querySelector("#toast");
 
-        // Элементы загрузчика файла
+        // Элементы загрузчика файла (форма добавления)
         const fileInput = document.querySelector("#book-file");
         const fileRow = document.querySelector("#file-upload-row");
         const fileStatus = document.querySelector("#file-status");
@@ -177,6 +220,23 @@
         const pageInput = document.querySelector("#page-input");
         const totalPagesEl = document.querySelector("#total-pages");
 
+        // Элементы окна редактирования
+        const editModal = document.querySelector("#edit-modal");
+        const editForm = document.querySelector("#edit-form");
+        const editNameInput = document.querySelector("#edit-name");
+        const editAuthorInput = document.querySelector("#edit-author");
+        const editYearInput = document.querySelector("#edit-year");
+        const editFileInput = document.querySelector("#edit-file");
+        const editFileRow = document.querySelector("#edit-file-row");
+        const editFileStatus = document.querySelector("#edit-file-status");
+        const editFileClearBtn = document.querySelector("#edit-file-clear");
+        const editCloseBtn = document.querySelector("#edit-close");
+        const editCancelBtn = document.querySelector("#edit-cancel");
+        const editSubmitBtn = document.querySelector("#edit-submit");
+
+        let editingBookId = null;
+        let editedFileContent = "";
+
         const CHARS_PER_PAGE = 2600;
         let currentPages = [];
         let currentPageIndex = 0;
@@ -186,22 +246,24 @@
         let toastTimer = null;
         let searchTimer = null;
 
-        // Чтение .txt файла с автоматическим распознаванием UTF-8 и Windows-1251
+        // Универсальная функция декодирования .txt файлов (UTF-8 и Windows-1251)
+        async function decodeTextFile(file) {
+            const buffer = await file.arrayBuffer();
+            try {
+                const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
+                return utf8Decoder.decode(buffer);
+            } catch {
+                const win1251Decoder = new TextDecoder("windows-1251");
+                return win1251Decoder.decode(buffer);
+            }
+        }
+
+        // Загрузка файла в форме создания
         fileInput.addEventListener("change", async () => {
             const file = fileInput.files[0];
             if (!file) return;
 
-            const buffer = await file.arrayBuffer();
-            let text = "";
-            try {
-                const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
-                text = utf8Decoder.decode(buffer);
-            } catch {
-                const win1251Decoder = new TextDecoder("windows-1251");
-                text = win1251Decoder.decode(buffer);
-            }
-
-            loadedFileContent = text;
+            loadedFileContent = await decodeTextFile(file);
             const sizeKb = Math.max(1, Math.round(file.size / 1024));
             fileStatus.textContent = `Выбран файл: ${file.name} (${sizeKb} КБ)`;
             fileRow.classList.add("has-file");
@@ -231,6 +293,77 @@
         }
 
         fileClearBtn.addEventListener("click", () => clearFileSelection(true));
+
+        // Загрузка файла в модальном окне редактирования
+        editFileInput.addEventListener("change", async () => {
+            const file = editFileInput.files[0];
+            if (!file) return;
+
+            editedFileContent = await decodeTextFile(file);
+            const sizeKb = Math.max(1, Math.round(file.size / 1024));
+            editFileStatus.textContent = `Новый файл: ${file.name} (${sizeKb} КБ)`;
+            editFileRow.classList.add("has-file");
+        });
+
+        function clearEditFileSelection() {
+            editFileInput.value = "";
+            editedFileContent = "";
+            editFileStatus.textContent = "Текущий текст книги сохранится";
+            editFileRow.classList.remove("has-file");
+        }
+
+        editFileClearBtn.addEventListener("click", clearEditFileSelection);
+
+        function openEditModal(book) {
+            editingBookId = book.id;
+            editNameInput.value = book.name;
+            editAuthorInput.value = book.author;
+            editYearInput.value = book.year;
+            clearEditFileSelection();
+            editModal.classList.add("open");
+        }
+
+        function closeEditModal() {
+            editModal.classList.remove("open");
+            editingBookId = null;
+        }
+
+        editCloseBtn.addEventListener("click", closeEditModal);
+        editCancelBtn.addEventListener("click", closeEditModal);
+        editModal.addEventListener("click", (event) => {
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+        });
+
+        editForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            if (editingBookId === null) return;
+
+            editSubmitBtn.disabled = true;
+
+            const updatedBook = {
+                name: editNameInput.value.trim(),
+                author: editAuthorInput.value.trim(),
+                year: Number(editYearInput.value),
+                content: editedFileContent
+            };
+
+            await fetch(`/api/books/${editingBookId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedBook)
+            });
+
+            if (editedFileContent.length > 0) {
+                localStorage.removeItem(`minilib_page_${editingBookId}`);
+            }
+
+            editSubmitBtn.disabled = false;
+            closeEditModal();
+            showToast(`Обновлено: «${updatedBook.name}»`);
+            await loadBooks(false);
+        });
 
         // Умная разбивка текста книги на страницы
         function paginateText(text) {
@@ -340,6 +473,10 @@
         });
 
         document.addEventListener("keydown", (event) => {
+            if (editModal.classList.contains("open") && event.key === "Escape") {
+                closeEditModal();
+                return;
+            }
             if (!readerModal.classList.contains("open")) return;
             if (event.key === "Escape") {
                 closeReader();
@@ -455,6 +592,7 @@
                 yearBadge.className = "year-badge";
                 yearBadge.textContent = `${book.year} г.`;
 
+                // Кнопка "Читать"
                 const readBtn = document.createElement("button");
                 readBtn.type = "button";
                 readBtn.className = "read-btn";
@@ -472,6 +610,25 @@
                 readBtn.appendChild(readText);
                 readBtn.addEventListener("click", () => openReader(book));
 
+                // Кнопка "Изменить"
+                const editBtn = document.createElement("button");
+                editBtn.type = "button";
+                editBtn.className = "edit-btn";
+
+                const editIcon = document.createElement("img");
+                editIcon.width = 16;
+                editIcon.height = 16;
+                editIcon.src = "https://img.icons8.com/fluency-systems-regular/20/60a5fa/edit--v1.png";
+                editIcon.alt = "edit";
+
+                const editText = document.createElement("span");
+                editText.textContent = "Изменить";
+
+                editBtn.appendChild(editIcon);
+                editBtn.appendChild(editText);
+                editBtn.addEventListener("click", () => openEditModal(book));
+
+                // Кнопка "Удалить"
                 const deleteBtn = document.createElement("button");
                 deleteBtn.type = "button";
                 deleteBtn.className = "delete-btn";
@@ -509,6 +666,7 @@
 
                 right.appendChild(yearBadge);
                 right.appendChild(readBtn);
+                right.appendChild(editBtn);
                 right.appendChild(deleteBtn);
 
                 item.appendChild(left);

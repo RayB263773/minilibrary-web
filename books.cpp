@@ -107,3 +107,24 @@ void delete_book(const char* db_url, int id) {
         throw std::runtime_error(std::string("Ошибка при удалении книги: ") + e.what());
     }
 }
+
+void update_book(const char* db_url, int id, const std::string &name, const std::string &author, int year, const std::string &content) {
+    try {
+        pqxx::connection conn(db_url);
+        pqxx::work tx(conn);
+        if (content.empty()) {
+            tx.exec(
+                "UPDATE book SET name = $1, author = $2, year = $3 WHERE id = $4",
+                pqxx::params(name, author, year, id)
+            );
+        } else {
+            tx.exec(
+                "UPDATE book SET name = $1, author = $2, year = $3, content = $4 WHERE id = $5",
+                pqxx::params(name, author, year, content, id)
+            );
+        }
+        tx.commit(); // Фиксируем изменения в базе данных
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Ошибка при редактировании книги: ") + e.what());
+    }
+}

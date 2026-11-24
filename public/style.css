@@ -220,7 +220,6 @@ input:focus {
     cursor: wait;
 }
 
-/* Панель загрузки .txt файла на всю ширину формы */
 .file-upload-row {
     grid-column: 1 / -1;
     display: flex;
@@ -426,7 +425,7 @@ input:focus {
     align-items: flex-start;
     gap: 14px;
     min-width: 0;
-    flex: 1 1 220px;
+    flex: 1 1 200px;
 }
 
 .book-details {
@@ -455,7 +454,7 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
     flex-shrink: 0;
     margin-left: auto;
 }
@@ -477,7 +476,7 @@ input:focus {
     background-color: rgba(245, 158, 11, 0.12);
     color: #fbbf24;
     border: 1px solid rgba(245, 158, 11, 0.3);
-    padding: 7px 12px;
+    padding: 7px 11px;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
@@ -495,6 +494,32 @@ input:focus {
     transform: scale(0.95);
 }
 
+/* Кнопка редактирования книги */
+.edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: rgba(96, 165, 250, 0.12);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    padding: 7px 11px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.edit-btn:hover {
+    background-color: rgba(96, 165, 250, 0.22);
+    border-color: rgba(96, 165, 250, 0.55);
+    box-shadow: 0 0 14px rgba(96, 165, 250, 0.22);
+}
+
+.edit-btn:active {
+    transform: scale(0.95);
+}
+
 .delete-btn {
     display: inline-flex;
     align-items: center;
@@ -502,7 +527,7 @@ input:focus {
     background-color: rgba(239, 68, 68, 0.1);
     color: #f87171;
     border: 1px solid rgba(239, 68, 68, 0.25);
-    padding: 7px 12px;
+    padding: 7px 11px;
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
@@ -531,7 +556,7 @@ input:focus {
     animation: cardSlideIn 0.25s ease both;
 }
 
-/* Модальное окно постраничной читалки */
+/* Модальные окна (читалка и редактирование) */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -569,6 +594,12 @@ input:focus {
     transform: translateY(18px) scale(0.97);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     overflow: hidden;
+}
+
+.modal-window.edit-modal-window {
+    max-width: 520px;
+    height: auto;
+    max-height: 92vh;
 }
 
 .modal-overlay.open .modal-window {
@@ -652,7 +683,6 @@ input:focus {
     text-align: center;
 }
 
-/* Нижняя панель переключения страниц в читалке */
 .modal-footer {
     display: flex;
     align-items: center;
@@ -707,6 +737,36 @@ input.page-input {
     border: 1px solid #343846;
     color: #fbbf24;
     border-radius: 6px;
+}
+
+/* Форма внутри окна редактирования */
+.edit-form {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #d1d5db;
+}
+
+.edit-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid #2b2e37;
 }
 
 /* Вкладка Info */

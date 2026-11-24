@@ -104,6 +104,23 @@ int main()
         return res;
     });
 
+    CROW_ROUTE(app, "/api/books/<int>").methods(crow::HTTPMethod::PUT)([db_url](const crow::request& req, int id) {
+        try {
+            auto body = crow::json::load(req.body);
+            if (!body || !body.has("name") || !body.has("author") || !body.has("year")) {
+                return crow::response(400, "Ошибка: нужны поля name, author и year");
+            }
+            std::string name = body["name"].s();
+            std::string author = body["author"].s();
+            int year = body["year"].i();
+            std::string content = body.has("content") ? std::string(body["content"].s()) : "";
+            update_book(db_url, id, name, author, year, content);
+            return crow::response(200, "Книга успешно обновлена");
+        } catch (const std::exception& e) {
+            return crow::response(400, std::string("Ошибка: ") + e.what());
+        }
+    });
+
     const char* port_env = std::getenv("PORT");
     int port = (port_env != nullptr) ? std::stoi(port_env) : 18080;
     app.port(port).run();

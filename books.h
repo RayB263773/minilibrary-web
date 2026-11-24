@@ -18,5 +18,6 @@ std::string get_book_content(const char* db_url, int id);
 
 void add_book(const char* db_url, const std::string &name, const std::string &author, int year, const std::string &content);
 void delete_book(const char* db_url, int id);
+void update_book(const char* db_url, int id, const std::string &name, const std::string &author, int year, const std::string &content);
 
 #endif // BOOKS_H
