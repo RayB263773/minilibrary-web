@@ -14,9 +14,15 @@ int main()
         return 1;
     }
 // Маршрут для получения всех книг
-    CROW_ROUTE(app, "/api/books")( [db_url] {
+    CROW_ROUTE(app, "/api/books")( [db_url](const crow::request& req) {
         try {
-            std::vector<Book> books = get_all_books(db_url);
+            std::vector<Book> books;
+            const char* q = req.url_params.get("q");
+            if (q != nullptr) {
+                books = find_books(db_url, q);
+            } else {
+                books = get_all_books(db_url);
+            }
             crow::json::wvalue::list books_list;
             for (const auto& b : books) {
                 crow::json::wvalue book_json;
