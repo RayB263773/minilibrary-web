@@ -21,7 +21,7 @@ int main()
         return 1;
     }
 
-    // Маршрут для получения всех книг и поиска
+    // Маршрут для получения списка книг (без тяжелого текста)
     CROW_ROUTE(app, "/api/books")([db_url](const crow::request& req) {
         try {
             std::vector<Book> books;
@@ -38,7 +38,6 @@ int main()
                 book_json["name"] = b.name;
                 book_json["author"] = b.author;
                 book_json["year"] = b.year;
-                book_json["content"] = b.content;
                 books_list.push_back(std::move(book_json));
             }
             crow::json::wvalue result;
@@ -49,18 +48,30 @@ int main()
         }
     });
 
+    // Маршрут для подгрузки текста одной книги по клику на "Читать"
+    CROW_ROUTE(app, "/api/books/<int>").methods(crow::HTTPMethod::GET)([db_url](int id) {
+        try {
+            std::string content = get_book_content(db_url, id);
+            crow::json::wvalue result;
+            result["content"] = std::move(content);
+            return crow::response{result};
+        } catch (const std::exception& e) {
+            return crow::response(500, std::string("Ошибка: ") + e.what());
+        }
+    });
+
     // Маршрут для добавления книги
     CROW_ROUTE(app, "/api/books").methods(crow::HTTPMethod::POST)([db_url](const crow::request& req) {
         try {
             auto body = crow::json::load(req.body);
-            if (!body || !body.has("name") || !body.has("author") || !body.has("year") || !body.has("content")) {
-                return crow::response(400, "Ошибка: нужны поля name, author, year и content");
+            if (!body || !body.has("name") || !body.has("author") || !body.has("year")) {
+                return crow::response(400, "Ошибка: нужны поля name, author и year");
             }
 
             std::string name = body["name"].s();
             std::string author = body["author"].s();
             int year = body["year"].i();
-            std::string content = body["content"].s();
+            std::string content = body.has("content") ? std::string(body["content"].s()) : "";
 
             add_book(db_url, name, author, year, content);
             return crow::response(201, "Книга успешно добавлена");

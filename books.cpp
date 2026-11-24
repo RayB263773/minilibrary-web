@@ -15,7 +15,6 @@ void init_db(const char* db_url) {
             "year INT NOT NULL, "
             "content TEXT NOT NULL DEFAULT '')"
         );
-        // Безопасно добавляем колонку content, если таблица была создана раньше
         tx.exec("ALTER TABLE book ADD COLUMN IF NOT EXISTS content TEXT NOT NULL DEFAULT ''");
         tx.commit();
     } catch (const std::exception& e) {
@@ -28,14 +27,14 @@ std::vector<Book> get_all_books(const char* db_url) {
     try {
         pqxx::connection conn(db_url);
         pqxx::read_transaction tx(conn);
-        pqxx::result rows = tx.exec("SELECT id, name, author, year, content FROM book ORDER BY id");
+        // Запрашиваем только легкие метаданные без текста книги
+        pqxx::result rows = tx.exec("SELECT id, name, author, year FROM book ORDER BY id");
         for (const auto& row : rows) {
             Book book;
             book.id = row["id"].as<int>();
             book.name = row["name"].as<std::string>();
             book.author = row["author"].as<std::string>();
             book.year = row["year"].as<int>();
-            book.content = row["content"].as<std::string>();
             books.push_back(std::move(book));
         }
     } catch (const std::exception& e) {
@@ -50,7 +49,7 @@ std::vector<Book> find_books(const char* db_url, const std::string& search_term)
         pqxx::connection conn(db_url);
         pqxx::read_transaction tx(conn);
         pqxx::result rows = tx.exec(
-            "SELECT id, name, author, year, content FROM book WHERE name ILIKE $1 OR author ILIKE $1 ORDER BY id",
+            "SELECT id, name, author, year FROM book WHERE name ILIKE $1 OR author ILIKE $1 ORDER BY id",
             pqxx::params("%" + search_term + "%")
         );
         for (const auto& row : rows) {
@@ -59,13 +58,29 @@ std::vector<Book> find_books(const char* db_url, const std::string& search_term)
             book.name = row["name"].as<std::string>();
             book.author = row["author"].as<std::string>();
             book.year = row["year"].as<int>();
-            book.content = row["content"].as<std::string>();
             books.push_back(std::move(book));
         }
     } catch (const std::exception& e) {
         throw std::runtime_error(std::string("Ошибка при поиске книг: ") + e.what());
     }
     return books;
+}
+
+std::string get_book_content(const char* db_url, int id) {
+    try {
+        pqxx::connection conn(db_url);
+        pqxx::read_transaction tx(conn);
+        pqxx::result rows = tx.exec(
+            "SELECT content FROM book WHERE id = $1",
+            pqxx::params(id)
+        );
+        if (rows.empty()) {
+            return "";
+        }
+        return rows[0]["content"].as<std::string>();
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Ошибка при загрузке текста книги: ") + e.what());
+    }
 }
 
 void add_book(const char* db_url, const std::string &name, const std::string &author, int year, const std::string &content) {

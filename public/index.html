@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css?v=3">
+    <link rel="stylesheet" href="/style.css?v=4">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
@@ -43,7 +43,16 @@
                     <img width="16" height="16" src="https://img.icons8.com/fluency-systems-filled/20/ffffff/plus-math.png" alt="add">
                     Добавить
                 </button>
-                <textarea id="content" placeholder="Содержимое книги или краткий конспект (необязательно)..."></textarea>
+
+                <div id="file-upload-row" class="file-upload-row">
+                    <label for="book-file" class="file-label">
+                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/upload--v1.png" alt="upload">
+                        Загрузить файл книги (.txt)
+                    </label>
+                    <input id="book-file" type="file" accept=".txt,.md" hidden>
+                    <span id="file-status" class="file-status">Файл не выбран (можно добавить книгу без текста)</span>
+                    <button type="button" id="file-clear" class="file-clear-btn">Сбросить ✕</button>
+                </div>
             </form>
 
             <div class="search-box">
@@ -62,7 +71,7 @@
                     О веб-приложении Mini Library
                 </h2>
                 <p>
-                    Клиент-серверное приложение для управления личной библиотекой и чтения книг онлайн. 
+                    Клиент-серверное приложение для управления личной библиотекой и постраничного чтения книг онлайн. 
                     Серверная часть написана на C++20 с использованием микрофреймворка Crow и хранит данные в СУБД PostgreSQL.
                 </p>
             </div>
@@ -76,18 +85,18 @@
                     <ul>
                         <li><strong>Backend:</strong> C++20, Crow HTTP Framework</li>
                         <li><strong>База данных:</strong> PostgreSQL + драйвер <code>libpqxx</code></li>
-                        <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS (Fetch API)</li>
+                        <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS (Fetch + FileReader)</li>
                     </ul>
                 </div>
 
                 <div class="info-card">
                     <div class="info-card-header">
                         <img width="24" height="24" src="https://img.icons8.com/fluency/48/database.png" alt="architecture">
-                        <h3>Модульная архитектура</h3>
+                        <h3>Оптимизированная загрузка</h3>
                     </div>
                     <p>
-                        Логика разделена на независимые слои: HTTP-маршруты и упаковка JSON находятся в <code>main.cpp</code>, 
-                        а параметризованные SQL-запросы изолированы в модуле <code>books.h / books.cpp</code>.
+                        Каталог загружает только легкие метаданные книг, а полный текст запрашивается отдельно по маршруту 
+                        <code>GET /api/books/&lt;id&gt;</code> и разбивается на страницы без нагрузки на браузер.
                     </p>
                 </div>
 
@@ -97,9 +106,9 @@
                         <h3>Маршруты REST API</h3>
                     </div>
                     <ul>
-                        <li><code>GET /api/books</code> — список всех книг с текстом</li>
-                        <li><code>GET /api/books?q=...</code> — поиск по названию и автору</li>
-                        <li><code>POST /api/books</code> — добавление книги и текста</li>
+                        <li><code>GET /api/books</code> — метаданные всех книг</li>
+                        <li><code>GET /api/books/&lt;id&gt;</code> — подгрузка текста книги</li>
+                        <li><code>POST /api/books</code> — загрузка книги и <code>.txt</code></li>
                         <li><code>DELETE /api/books/&lt;id&gt;</code> — удаление по ID</li>
                     </ul>
                 </div>
@@ -118,7 +127,7 @@
         </section>
     </div>
 
-    <!-- Модальное окно чтения книги -->
+    <!-- Модальное окно постраничной читалки -->
     <div id="reader-modal" class="modal-overlay">
         <div class="modal-window">
             <div class="modal-header">
@@ -129,6 +138,15 @@
                 <button type="button" id="reader-close" class="modal-close-btn">Закрыть ✕</button>
             </div>
             <div id="reader-body" class="modal-body"></div>
+            <div id="reader-footer" class="modal-footer">
+                <button type="button" id="prev-page" class="page-btn">← Назад</button>
+                <div class="page-indicator">
+                    <span>Стр.</span>
+                    <input id="page-input" type="number" min="1" class="page-input">
+                    <span id="total-pages">из 1</span>
+                </div>
+                <button type="button" id="next-page" class="page-btn">Вперёд →</button>
+            </div>
         </div>
     </div>
 
@@ -138,35 +156,170 @@
         const list = document.querySelector("#books");
         const countBadge = document.querySelector("#book-count");
         const toastEl = document.querySelector("#toast");
+
+        // Элементы загрузчика файла
+        const fileInput = document.querySelector("#book-file");
+        const fileRow = document.querySelector("#file-upload-row");
+        const fileStatus = document.querySelector("#file-status");
+        const fileClearBtn = document.querySelector("#file-clear");
+        let loadedFileContent = "";
+
+        // Элементы читалки
         const readerModal = document.querySelector("#reader-modal");
         const readerTitle = document.querySelector("#reader-title");
         const readerMeta = document.querySelector("#reader-meta");
         const readerBody = document.querySelector("#reader-body");
+        const readerFooter = document.querySelector("#reader-footer");
         const readerCloseBtn = document.querySelector("#reader-close");
+        const prevPageBtn = document.querySelector("#prev-page");
+        const nextPageBtn = document.querySelector("#next-page");
+        const pageInput = document.querySelector("#page-input");
+        const totalPagesEl = document.querySelector("#total-pages");
+
+        const CHARS_PER_PAGE = 2600;
+        let currentPages = [];
+        let currentPageIndex = 0;
+        let currentBookId = null;
 
         let currentCount = 0;
         let toastTimer = null;
         let searchTimer = null;
 
-        // Открытие и закрытие окна чтения
-        function openReader(book) {
+        // Чтение .txt файла с автоматическим распознаванием UTF-8 и Windows-1251
+        fileInput.addEventListener("change", async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const buffer = await file.arrayBuffer();
+            let text = "";
+            try {
+                const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
+                text = utf8Decoder.decode(buffer);
+            } catch {
+                const win1251Decoder = new TextDecoder("windows-1251");
+                text = win1251Decoder.decode(buffer);
+            }
+
+            loadedFileContent = text;
+            const sizeKb = Math.max(1, Math.round(file.size / 1024));
+            fileStatus.textContent = `${file.name} (${sizeKb} КБ)`;
+            fileRow.classList.add("has-file");
+
+            // Если поле названия пустое, подставляем имя файла без расширения
+            const nameInput = document.querySelector("#name");
+            if (!nameInput.value.trim()) {
+                nameInput.value = file.name.replace(/\.(txt|md)$/i, "");
+            }
+        });
+
+        function clearFileSelection() {
+            fileInput.value = "";
+            loadedFileContent = "";
+            fileStatus.textContent = "Файл не выбран (можно добавить книгу без текста)";
+            fileRow.classList.remove("has-file");
+        }
+
+        fileClearBtn.addEventListener("click", clearFileSelection);
+
+        // Умная разбивка текста книги на страницы по абзацам и пробелам
+        function paginateText(text) {
+            const clean = text.replace(/\r\n/g, "\n").trim();
+            if (!clean) return [];
+
+            const pages = [];
+            let pos = 0;
+
+            while (pos < clean.length) {
+                if (pos + CHARS_PER_PAGE >= clean.length) {
+                    pages.push(clean.slice(pos).trim());
+                    break;
+                }
+
+                let splitAt = clean.lastIndexOf("\n", pos + CHARS_PER_PAGE);
+                if (splitAt <= pos + CHARS_PER_PAGE * 0.5) {
+                    splitAt = clean.lastIndexOf(" ", pos + CHARS_PER_PAGE);
+                }
+                if (splitAt <= pos) {
+                    splitAt = pos + CHARS_PER_PAGE;
+                }
+
+                pages.push(clean.slice(pos, splitAt).trim());
+                pos = splitAt + 1;
+            }
+            return pages;
+        }
+
+        function renderCurrentPage() {
+            if (currentPages.length === 0) return;
+
+            readerBody.textContent = currentPages[currentPageIndex];
+            readerBody.scrollTop = 0;
+
+            pageInput.value = currentPageIndex + 1;
+            pageInput.max = currentPages.length;
+            totalPagesEl.textContent = `из ${currentPages.length}`;
+
+            prevPageBtn.disabled = currentPageIndex === 0;
+            nextPageBtn.disabled = currentPageIndex === currentPages.length - 1;
+
+            if (currentBookId !== null) {
+                localStorage.setItem(`minilib_page_${currentBookId}`, String(currentPageIndex));
+            }
+        }
+
+        async function openReader(book) {
+            currentBookId = book.id;
             readerTitle.textContent = book.name;
             readerMeta.textContent = `${book.author} • ${book.year} г.`;
 
-            if (book.content && book.content.trim().length > 0) {
-                readerBody.textContent = book.content;
-                readerBody.classList.remove("empty-content");
-            } else {
-                readerBody.textContent = "Для этой книги содержимое пока не добавлено.";
+            readerBody.textContent = "Загрузка текста книги...";
+            readerBody.classList.add("empty-content");
+            readerFooter.style.display = "none";
+            readerModal.classList.add("open");
+
+            const response = await fetch(`/api/books/${book.id}`);
+            const data = await response.json();
+
+            currentPages = paginateText(data.content || "");
+
+            if (currentPages.length === 0) {
+                readerBody.textContent = "Для этой книги файл с текстом пока не загружен.";
                 readerBody.classList.add("empty-content");
+                return;
             }
 
-            readerModal.classList.add("open");
+            readerBody.classList.remove("empty-content");
+            readerFooter.style.display = "flex";
+
+            const savedPage = Number(localStorage.getItem(`minilib_page_${book.id}`)) || 0;
+            currentPageIndex = Math.min(Math.max(0, savedPage), currentPages.length - 1);
+            renderCurrentPage();
         }
 
         function closeReader() {
             readerModal.classList.remove("open");
         }
+
+        prevPageBtn.addEventListener("click", () => {
+            if (currentPageIndex > 0) {
+                currentPageIndex--;
+                renderCurrentPage();
+            }
+        });
+
+        nextPageBtn.addEventListener("click", () => {
+            if (currentPageIndex < currentPages.length - 1) {
+                currentPageIndex++;
+                renderCurrentPage();
+            }
+        });
+
+        pageInput.addEventListener("change", () => {
+            if (currentPages.length === 0) return;
+            const target = Number(pageInput.value) - 1;
+            currentPageIndex = Math.min(Math.max(0, target), currentPages.length - 1);
+            renderCurrentPage();
+        });
 
         readerCloseBtn.addEventListener("click", closeReader);
         readerModal.addEventListener("click", (event) => {
@@ -174,9 +327,15 @@
                 closeReader();
             }
         });
+
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && readerModal.classList.contains("open")) {
+            if (!readerModal.classList.contains("open")) return;
+            if (event.key === "Escape") {
                 closeReader();
+            } else if (event.key === "ArrowRight" && document.activeElement !== pageInput) {
+                nextPageBtn.click();
+            } else if (event.key === "ArrowLeft" && document.activeElement !== pageInput) {
+                prevPageBtn.click();
             }
         });
 
@@ -285,7 +444,6 @@
                 yearBadge.className = "year-badge";
                 yearBadge.textContent = `${book.year} г.`;
 
-                // Кнопка "Читать"
                 const readBtn = document.createElement("button");
                 readBtn.type = "button";
                 readBtn.className = "read-btn";
@@ -303,7 +461,6 @@
                 readBtn.appendChild(readText);
                 readBtn.addEventListener("click", () => openReader(book));
 
-                // Кнопка "Удалить"
                 const deleteBtn = document.createElement("button");
                 deleteBtn.type = "button";
                 deleteBtn.className = "delete-btn";
@@ -360,7 +517,7 @@
                 name: document.querySelector("#name").value,
                 author: document.querySelector("#author").value,
                 year: Number(document.querySelector("#year").value),
-                content: document.querySelector("#content").value
+                content: loadedFileContent
             };
 
             await fetch("/api/books", {
@@ -370,6 +527,7 @@
             });
 
             form.reset();
+            clearFileSelection();
             submitBtn.disabled = false;
             showToast(`Добавлена книга «${book.name}»`);
             await loadBooks(true);

@@ -713,4 +713,119 @@ textarea:focus {
     .year-badge {
         margin-right: auto;
     }
+    /* Панель загрузки .txt файла */
+.file-upload-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: #1b1e26;
+    border: 1px dashed #383d4b;
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.file-upload-row.has-file {
+    border-style: solid;
+    border-color: rgba(245, 158, 11, 0.45);
+    background-color: rgba(245, 158, 11, 0.06);
+}
+
+.file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #272b36;
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.file-label:hover {
+    background-color: #313644;
+    border-color: rgba(245, 158, 11, 0.55);
+}
+
+.file-status {
+    font-size: 13px;
+    color: #9ca3af;
+    flex: 1;
+    min-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-clear-btn {
+    background: transparent;
+    color: #f87171;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: none;
+}
+
+.file-upload-row.has-file .file-clear-btn {
+    display: inline-block;
+}
+
+/* Нижняя панель постраничной навигации в читалке */
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 24px;
+    border-top: 1px solid #2b2e37;
+    background-color: #16181e;
+}
+
+.page-btn {
+    background-color: #252832;
+    color: #f3f4f6;
+    border: 1px solid #343846;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #303442;
+    border-color: rgba(245, 158, 11, 0.45);
+}
+
+.page-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.page-input {
+    width: 58px !important;
+    text-align: center;
+    padding: 4px 6px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+}
 }
