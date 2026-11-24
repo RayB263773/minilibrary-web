@@ -1,75 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
-    <h1>Welcome to the Mini Library</h1>
-    <form id="book-form">
-        <input id="name" placeholder="Название книги" required>
-        <input id="author" placeholder="Автор" required>
-        <input id="year" type="number" placeholder="Год издания" required>
-        <button type="submit">Добавить</button>
-    </form>
-    <input id="search" placeholder="Поиск по названию или автору">
-    <ul id="books"></ul> 
-    <script>
-        
-        async function loadBooks() {
-            // 1. Сначала находим список, затем очищаем его:
-            const list = document.querySelector("#books");
-            list.replaceChildren();
+    <div class="container">
+        <header class="header">
+            <div class="title-wrap">
+                <img width="42" height="42" src="https://img.icons8.com/fluency/48/books.png" alt="books">
+                <div>
+                    <h1>Mini Library</h1>
+                    <p class="subtitle">Личный каталог книг на C++ и PostgreSQL</p>
+                </div>
+            </div>
 
+            <div class="header-controls">
+                <nav class="tabs-nav">
+                    <button type="button" class="tab-btn active" data-tab="catalog">
+                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/library.png" alt="catalog">
+                        Каталог
+                    </button>
+                    <button type="button" class="tab-btn" data-tab="info">
+                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/9ca3af/info.png" alt="info">
+                        Info
+                    </button>
+                </nav>
+                <span id="book-count" class="count-badge">Книг: 0</span>
+            </div>
+        </header>
+
+        <!-- Вкладка 1: Каталог книг -->
+        <section id="tab-catalog" class="tab-panel active">
+            <form id="book-form" class="book-form">
+                <input id="name" placeholder="Название книги" required>
+                <input id="author" placeholder="Автор" required>
+                <input id="year" type="number" placeholder="Год" required>
+                <button type="submit" id="submit-btn" class="add-btn">
+                    <img width="16" height="16" src="https://img.icons8.com/fluency-systems-filled/20/ffffff/plus-math.png" alt="add">
+                    Добавить
+                </button>
+            </form>
+
+            <div class="search-box">
+                <img class="search-icon" width="18" height="18" src="https://img.icons8.com/fluency-systems-regular/20/9ca3af/search--v1.png" alt="search">
+                <input id="search" placeholder="Поиск по названию или автору...">
+            </div>
+
+            <ul id="books" class="book-list"></ul>
+        </section>
+
+        <!-- Вкладка 2: Информация о проекте -->
+        <section id="tab-info" class="tab-panel">
+            <div class="info-hero">
+                <h2>
+                    <img width="24" height="24" src="https://img.icons8.com/fluency/48/info.png" alt="about">
+                    О веб-приложении Mini Library
+                </h2>
+                <p>
+                    Клиент-серверное приложение для управления личной библиотекой. 
+                    Серверная часть написана на C++20 с использованием микрофреймворка Crow и хранит данные в СУБД PostgreSQL.
+                </p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/code.png" alt="stack">
+                        <h3>Технологический стек</h3>
+                    </div>
+                    <ul>
+                        <li><strong>Backend:</strong> C++20, Crow HTTP Framework</li>
+                        <li><strong>База данных:</strong> PostgreSQL + драйвер <code>libpqxx</code></li>
+                        <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS (Fetch API)</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/database.png" alt="architecture">
+                        <h3>Модульная архитектура</h3>
+                    </div>
+                    <p>
+                        Логика разделена на независимые слои: HTTP-маршруты и упаковка JSON находятся в <code>main.cpp</code>, 
+                        а параметризованные SQL-запросы изолированы в модуле <code>books.h / books.cpp</code>.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/api-settings.png" alt="api">
+                        <h3>Маршруты REST API</h3>
+                    </div>
+                    <ul>
+                        <li><code>GET /api/books</code> — список всех книг</li>
+                        <li><code>GET /api/books?q=...</code> — поиск по названию и автору</li>
+                        <li><code>POST /api/books</code> — добавление новой книги</li>
+                        <li><code>DELETE /api/books/&lt;id&gt;</code> — удаление по ID</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/shield.png" alt="security">
+                        <h3>Надежность и защита</h3>
+                    </div>
+                    <p>
+                        Конфигурация подключения к БД передается через переменную окружения <code>DATABASE_URL</code>, 
+                        а все пользовательские параметры проходят через <code>pqxx::params</code> для защиты от SQL-инъекций.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const list = document.querySelector("#books");
+        const countBadge = document.querySelector("#book-count");
+        const toastEl = document.querySelector("#toast");
+        let currentCount = 0;
+        let toastTimer = null;
+        let searchTimer = null;
+
+        // Переключение вкладок "Каталог" и "Info"
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const tabPanels = {
+            catalog: document.querySelector("#tab-catalog"),
+            info: document.querySelector("#tab-info")
+        };
+
+        tabButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                const target = btn.dataset.tab;
+
+                tabButtons.forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                Object.values(tabPanels).forEach((panel) => panel.classList.remove("active"));
+                tabPanels[target].classList.add("active");
+            });
+        });
+
+        function showToast(message) {
+            toastEl.textContent = message;
+            toastEl.classList.add("visible");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toastEl.classList.remove("visible");
+            }, 2200);
+        }
+
+        function updateCounter(newCount) {
+            currentCount = newCount;
+            countBadge.textContent = `Книг: ${currentCount}`;
+            countBadge.classList.remove("bump");
+            void countBadge.offsetWidth;
+            countBadge.classList.add("bump");
+            setTimeout(() => countBadge.classList.remove("bump"), 260);
+        }
+
+        function renderEmptyState(query) {
+            const empty = document.createElement("li");
+            empty.className = "empty-state";
+            empty.textContent = query
+                ? "По вашему запросу ничего не найдено"
+                : "В библиотеке пока нет ни одной книги";
+            list.appendChild(empty);
+        }
+
+        async function loadBooks(highlightNewest = false) {
             const query = document.querySelector("#search").value.trim();
             const url = query ? `/api/books?q=${encodeURIComponent(query)}` : "/api/books";
 
+            list.classList.add("searching");
             const response = await fetch(url);
             const data = await response.json();
+            list.classList.remove("searching");
 
-            for (const book of data.books) {
+            list.replaceChildren();
+            updateCounter(data.books.length);
+
+            if (data.books.length === 0) {
+                renderEmptyState(query);
+                return;
+            }
+
+            data.books.forEach((book, index) => {
                 const item = document.createElement("li");
-                item.textContent = `${book.name} — ${book.author} (${book.year})`;
+                item.className = "book-card";
+
+                if (highlightNewest && index === data.books.length - 1) {
+                    item.classList.add("just-added");
+                } else {
+                    item.style.animationDelay = `${Math.min(index * 35, 250)}ms`;
+                }
+
+                const left = document.createElement("div");
+                left.className = "book-left";
+
+                const icon = document.createElement("img");
+                icon.width = 32;
+                icon.height = 32;
+                icon.src = "https://img.icons8.com/fluency/48/book.png";
+                icon.alt = "book";
+
+                const details = document.createElement("div");
+                details.className = "book-details";
+
+                const title = document.createElement("p");
+                title.className = "book-title";
+                title.textContent = book.name;
+
+                const author = document.createElement("p");
+                author.className = "book-author";
+                author.textContent = book.author;
+
+                details.appendChild(title);
+                details.appendChild(author);
+                left.appendChild(icon);
+                left.appendChild(details);
+
+                const right = document.createElement("div");
+                right.className = "book-right";
+
+                const yearBadge = document.createElement("span");
+                yearBadge.className = "year-badge";
+                yearBadge.textContent = `${book.year} г.`;
+
                 const deleteBtn = document.createElement("button");
-                deleteBtn.textContent = "Удалить";
+                deleteBtn.className = "delete-btn";
+
+                const trashIcon = document.createElement("img");
+                trashIcon.width = 16;
+                trashIcon.height = 16;
+                trashIcon.src = "https://img.icons8.com/fluency-systems-regular/20/f87171/trash--v1.png";
+                trashIcon.alt = "delete";
+
+                const btnText = document.createElement("span");
+                btnText.textContent = "Удалить";
+
+                deleteBtn.appendChild(trashIcon);
+                deleteBtn.appendChild(btnText);
+
                 deleteBtn.addEventListener("click", async () => {
+                    item.classList.add("removing");
+
                     await fetch(`/api/books/${book.id}`, {
                         method: "DELETE"
                     });
-                    await loadBooks();
-                });
-                item.appendChild(deleteBtn);
-                list.appendChild(item);
-            }
-        } // <-- Здесь функция loadBooks() полностью заканчивается
 
-        // 2. Снаружи функции находим форму и сразу вешаем на неё обработчик:
+                    setTimeout(() => {
+                        item.remove();
+                        updateCounter(currentCount - 1);
+                        showToast(`Удалено: «${book.name}»`);
+
+                        if (list.children.length === 0) {
+                            const currentQuery = document.querySelector("#search").value.trim();
+                            renderEmptyState(currentQuery);
+                        }
+                    }, 280);
+                });
+
+                right.appendChild(yearBadge);
+                right.appendChild(deleteBtn);
+
+                item.appendChild(left);
+                item.appendChild(right);
+                list.appendChild(item);
+            });
+        }
+
         const form = document.querySelector("#book-form");
+        const submitBtn = document.querySelector("#submit-btn");
 
         form.addEventListener("submit", async (event) => {
-            // ... дальше весь твой код внутри обработчика без изменений ...
             event.preventDefault();
+            submitBtn.disabled = true;
 
-            // 1. Собираем данные из полей ввода в объект
             const book = {
                 name: document.querySelector("#name").value,
                 author: document.querySelector("#author").value,
-                year: Number(document.querySelector("#year").value) // превращаем строку в число
+                year: Number(document.querySelector("#year").value)
             };
 
-            // 2. Отправляем POST-запрос (аналог нашего curl -X POST)
             await fetch("/api/books", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(book)
             });
-            // 3. Очищаем поля формы и заново загружаем список книг
-        form.reset();
-        await loadBooks();
-            });
+
+            form.reset();
+            submitBtn.disabled = false;
+            showToast(`Добавлена книга «${book.name}»`);
+            await loadBooks(true);
+        });
+
         const searchInput = document.querySelector("#search");
-        searchInput.addEventListener("input", loadBooks);
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                loadBooks(false);
+            }, 180);
+        });
+
         loadBooks();
     </script>
 </body>

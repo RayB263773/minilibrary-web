@@ -73,5 +73,11 @@ int main()
         res.set_static_file_info("public/index.html");
         return res;
     });
+// Маршрут для таблицы стилей
+    CROW_ROUTE(app, "/style.css")([]{
+        crow::response res;
+        res.set_static_file_info("public/style.css");
+        return res;
+    });
     app.port(18080).run();
 }
