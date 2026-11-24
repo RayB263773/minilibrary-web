@@ -1,0 +1,4 @@
+build/
+minilibrary
+.env
+.git/

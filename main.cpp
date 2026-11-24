@@ -13,6 +13,12 @@ int main()
         std::cerr << "Ошибка: DATABASE_URL не задан\n";
         return 1;
     }
+    try {
+        init_db(db_url);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
 // Маршрут для получения всех книг
     CROW_ROUTE(app, "/api/books")( [db_url](const crow::request& req) {
         try {
@@ -79,5 +85,7 @@ int main()
         res.set_static_file_info("public/style.css");
         return res;
     });
-    app.port(18080).run();
+    const char* port_env = std::getenv("PORT");
+    int port = (port_env != nullptr) ? std::stoi(port_env) : 18080;
+    app.port(port).run();
 }

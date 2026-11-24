@@ -16,5 +16,6 @@ std::vector<Book> find_books(const char* db_url, const std::string& search_term)
 
 void add_book(const char* db_url, const std::string &name, const std::string &author, int year);
 void delete_book(const char* db_url, int id);
+void init_db(const char* db_url);
 
 #endif // BOOKS_H

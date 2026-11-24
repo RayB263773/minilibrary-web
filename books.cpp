@@ -66,3 +66,20 @@ void delete_book(const char* db_url, int id) {
         throw std::runtime_error(std::string("Ошибка при удалении книги: ") + e.what());
     }
 }
+// Инициализация БД
+void init_db(const char* db_url) {
+    try {
+        pqxx::connection conn(db_url);
+        pqxx::work tx(conn);
+        tx.exec(
+            "CREATE TABLE IF NOT EXISTS book ("
+            "id SERIAL PRIMARY KEY, "
+            "name TEXT NOT NULL, "
+            "author TEXT NOT NULL, "
+            "year INT NOT NULL)"
+        );
+        tx.commit();
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Ошибка инициализации БД: ") + e.what());
+    }
+}
