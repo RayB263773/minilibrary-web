@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/style.css?v=3">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
@@ -43,6 +43,7 @@
                     <img width="16" height="16" src="https://img.icons8.com/fluency-systems-filled/20/ffffff/plus-math.png" alt="add">
                     Добавить
                 </button>
+                <textarea id="content" placeholder="Содержимое книги или краткий конспект (необязательно)..."></textarea>
             </form>
 
             <div class="search-box">
@@ -61,7 +62,7 @@
                     О веб-приложении Mini Library
                 </h2>
                 <p>
-                    Клиент-серверное приложение для управления личной библиотекой. 
+                    Клиент-серверное приложение для управления личной библиотекой и чтения книг онлайн. 
                     Серверная часть написана на C++20 с использованием микрофреймворка Crow и хранит данные в СУБД PostgreSQL.
                 </p>
             </div>
@@ -96,9 +97,9 @@
                         <h3>Маршруты REST API</h3>
                     </div>
                     <ul>
-                        <li><code>GET /api/books</code> — список всех книг</li>
+                        <li><code>GET /api/books</code> — список всех книг с текстом</li>
                         <li><code>GET /api/books?q=...</code> — поиск по названию и автору</li>
-                        <li><code>POST /api/books</code> — добавление новой книги</li>
+                        <li><code>POST /api/books</code> — добавление книги и текста</li>
                         <li><code>DELETE /api/books/&lt;id&gt;</code> — удаление по ID</li>
                     </ul>
                 </div>
@@ -117,15 +118,67 @@
         </section>
     </div>
 
+    <!-- Модальное окно чтения книги -->
+    <div id="reader-modal" class="modal-overlay">
+        <div class="modal-window">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2 id="reader-title">Название книги</h2>
+                    <p id="reader-meta" class="modal-meta">Автор • Год</p>
+                </div>
+                <button type="button" id="reader-close" class="modal-close-btn">Закрыть ✕</button>
+            </div>
+            <div id="reader-body" class="modal-body"></div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
 
     <script>
         const list = document.querySelector("#books");
         const countBadge = document.querySelector("#book-count");
         const toastEl = document.querySelector("#toast");
+        const readerModal = document.querySelector("#reader-modal");
+        const readerTitle = document.querySelector("#reader-title");
+        const readerMeta = document.querySelector("#reader-meta");
+        const readerBody = document.querySelector("#reader-body");
+        const readerCloseBtn = document.querySelector("#reader-close");
+
         let currentCount = 0;
         let toastTimer = null;
         let searchTimer = null;
+
+        // Открытие и закрытие окна чтения
+        function openReader(book) {
+            readerTitle.textContent = book.name;
+            readerMeta.textContent = `${book.author} • ${book.year} г.`;
+
+            if (book.content && book.content.trim().length > 0) {
+                readerBody.textContent = book.content;
+                readerBody.classList.remove("empty-content");
+            } else {
+                readerBody.textContent = "Для этой книги содержимое пока не добавлено.";
+                readerBody.classList.add("empty-content");
+            }
+
+            readerModal.classList.add("open");
+        }
+
+        function closeReader() {
+            readerModal.classList.remove("open");
+        }
+
+        readerCloseBtn.addEventListener("click", closeReader);
+        readerModal.addEventListener("click", (event) => {
+            if (event.target === readerModal) {
+                closeReader();
+            }
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && readerModal.classList.contains("open")) {
+                closeReader();
+            }
+        });
 
         // Переключение вкладок "Каталог" и "Info"
         const tabButtons = document.querySelectorAll(".tab-btn");
@@ -232,7 +285,27 @@
                 yearBadge.className = "year-badge";
                 yearBadge.textContent = `${book.year} г.`;
 
+                // Кнопка "Читать"
+                const readBtn = document.createElement("button");
+                readBtn.type = "button";
+                readBtn.className = "read-btn";
+
+                const readIcon = document.createElement("img");
+                readIcon.width = 16;
+                readIcon.height = 16;
+                readIcon.src = "https://img.icons8.com/fluency-systems-regular/20/fbbf24/open-book--v1.png";
+                readIcon.alt = "read";
+
+                const readText = document.createElement("span");
+                readText.textContent = "Читать";
+
+                readBtn.appendChild(readIcon);
+                readBtn.appendChild(readText);
+                readBtn.addEventListener("click", () => openReader(book));
+
+                // Кнопка "Удалить"
                 const deleteBtn = document.createElement("button");
+                deleteBtn.type = "button";
                 deleteBtn.className = "delete-btn";
 
                 const trashIcon = document.createElement("img");
@@ -267,6 +340,7 @@
                 });
 
                 right.appendChild(yearBadge);
+                right.appendChild(readBtn);
                 right.appendChild(deleteBtn);
 
                 item.appendChild(left);
@@ -285,7 +359,8 @@
             const book = {
                 name: document.querySelector("#name").value,
                 author: document.querySelector("#author").value,
-                year: Number(document.querySelector("#year").value)
+                year: Number(document.querySelector("#year").value),
+                content: document.querySelector("#content").value
             };
 
             await fetch("/api/books", {
