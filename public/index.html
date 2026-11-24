@@ -13,6 +13,7 @@
         <input id="year" type="number" placeholder="Год издания" required>
         <button type="submit">Добавить</button>
     </form>
+    <input id="search" placeholder="Поиск по названию или автору">
     <ul id="books"></ul> 
     <script>
         
@@ -21,7 +22,10 @@
             const list = document.querySelector("#books");
             list.replaceChildren();
 
-            const response = await fetch("/api/books");
+            const query = document.querySelector("#search").value.trim();
+            const url = query ? `/api/books?q=${encodeURIComponent(query)}` : "/api/books";
+
+            const response = await fetch(url);
             const data = await response.json();
 
             for (const book of data.books) {
@@ -60,11 +64,12 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(book)
             });
-
             // 3. Очищаем поля формы и заново загружаем список книг
-            form.reset();
-            await loadBooks();
+        form.reset();
+        await loadBooks();
             });
+        const searchInput = document.querySelector("#search");
+        searchInput.addEventListener("input", loadBooks);
         loadBooks();
     </script>
 </body>
