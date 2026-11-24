@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #include "books.h"
-
+// Функция для получения всех книг из базы данных
 std::vector<Book> get_all_books(const char* db_url) {
     std::vector<Book> books;
     try {
@@ -22,7 +22,7 @@ std::vector<Book> get_all_books(const char* db_url) {
     }
     return books;
 }
-
+// Функция для добавления книги в базу данных
 void add_book(const char* db_url, const std::string &name, const std::string &author, int year) {
     try {
         pqxx::connection conn(db_url);
@@ -31,5 +31,16 @@ void add_book(const char* db_url, const std::string &name, const std::string &au
         tx.commit();
     } catch (const std::exception& e) {
         throw std::runtime_error(std::string("Ошибка при добавлении книги: ") + e.what());
+    }
+}
+// Функция для удаления книги из базы данных
+void delete_book(const char* db_url, int id) {
+    try {
+        pqxx::connection conn(db_url);
+        pqxx::work tx(conn);
+        tx.exec("DELETE FROM book WHERE id = $1", pqxx::params(id));
+        tx.commit();
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Ошибка при удалении книги: ") + e.what());
     }
 }

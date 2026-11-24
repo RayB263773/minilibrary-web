@@ -13,7 +13,7 @@ int main()
         std::cerr << "Ошибка: DATABASE_URL не задан\n";
         return 1;
     }
-
+// Маршрут для получения всех книг
     CROW_ROUTE(app, "/api/books")( [db_url] {
         try {
             std::vector<Book> books = get_all_books(db_url);
@@ -33,7 +33,7 @@ int main()
             return crow::response(500, std::string("Ошибка: ") + e.what());
         }
     });
-
+// Маршрут для добавления книги
     CROW_ROUTE(app, "/api/books").methods(crow::HTTPMethod::POST)( [db_url](const crow::request& req) {
         try {
             auto body = crow::json::load(req.body);
@@ -52,7 +52,16 @@ int main()
         }
 
     });
-
+// Маршрут для удаления книги
+    CROW_ROUTE(app, "/api/books/<int>").methods(crow::HTTPMethod::DELETE)( [db_url](int id) {
+        try {
+            delete_book(db_url, id);
+            return crow::response(200, "Книга успешно удалена");
+        } catch (const std::exception& e) {
+            return crow::response(400, std::string("Ошибка: ") + e.what());
+        }
+    });
+// Маршрут для отображения главной страницы
     CROW_ROUTE(app, "/")( []{
         crow::response res;
         res.set_static_file_info("public/index.html");
