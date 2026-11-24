@@ -27,6 +27,15 @@
             for (const book of data.books) {
                 const item = document.createElement("li");
                 item.textContent = `${book.name} — ${book.author} (${book.year})`;
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "Удалить";
+                deleteBtn.addEventListener("click", async () => {
+                    await fetch(`/api/books/${book.id}`, {
+                        method: "DELETE"
+                    });
+                    await loadBooks();
+                });
+                item.appendChild(deleteBtn);
                 list.appendChild(item);
             }
         } // <-- Здесь функция loadBooks() полностью заканчивается
