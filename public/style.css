@@ -9,7 +9,6 @@ body {
     background-image: 
         radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.14), transparent 55%),
         radial-gradient(circle at 85% 90%, rgba(234, 88, 12, 0.08), transparent 45%);
-    background-attachment: fixed;
     color: #f3f4f6;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
@@ -27,15 +26,11 @@ body {
         0 20px 50px rgba(0, 0, 0, 0.6),
         0 0 38px rgba(245, 158, 11, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.07);
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: border-color 0.25s ease;
 }
 
 .container:focus-within {
     border-color: rgba(245, 158, 11, 0.38);
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.65),
-        0 0 48px rgba(245, 158, 11, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
 .header {
@@ -95,7 +90,7 @@ body {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .tab-btn:hover {
@@ -105,9 +100,7 @@ body {
 .tab-btn.active {
     background-color: #252832;
     color: #fbbf24;
-    box-shadow: 
-        0 2px 8px rgba(0, 0, 0, 0.35),
-        0 0 14px rgba(245, 158, 11, 0.16);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .count-badge {
@@ -118,14 +111,12 @@ body {
     font-weight: 600;
     padding: 6px 12px;
     border-radius: 999px;
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.1);
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, box-shadow 0.25s;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s;
 }
 
 .count-badge.bump {
     transform: scale(1.14);
     border-color: #f59e0b;
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
 .tab-panel {
@@ -134,17 +125,17 @@ body {
 
 .tab-panel.active {
     display: block;
-    animation: tabFadeSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: tabFadeSlide 0.25s ease-out both;
 }
 
 @keyframes tabFadeSlide {
     from {
         opacity: 0;
-        transform: translateY(10px) scale(0.99);
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
@@ -156,14 +147,12 @@ body {
     padding: 14px;
     border-radius: 12px;
     border: 1px solid #2a2d36;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     margin-bottom: 20px;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    transition: border-color 0.2s ease;
 }
 
 .book-form:focus-within {
     border-color: rgba(245, 158, 11, 0.35);
-    box-shadow: 0 0 22px rgba(245, 158, 11, 0.08);
 }
 
 input {
@@ -175,7 +164,7 @@ input {
     font-size: 14px;
     font-family: inherit;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    transition: border-color 0.2s;
     width: 100%;
 }
 
@@ -185,7 +174,6 @@ input::placeholder {
 
 input:focus {
     border-color: #f59e0b;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.16);
 }
 
 .add-btn {
@@ -201,14 +189,12 @@ input:focus {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 0 16px rgba(234, 88, 12, 0.25);
-    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    transition: background-color 0.15s, transform 0.12s;
     white-space: nowrap;
 }
 
 .add-btn:hover {
     background-color: #f97316;
-    box-shadow: 0 4px 18px rgba(234, 88, 12, 0.45);
 }
 
 .add-btn:active {
@@ -232,7 +218,6 @@ input:focus {
     border-radius: 8px;
     padding: 10px 14px;
     margin-top: 2px;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .file-upload-row.has-file {
@@ -254,13 +239,12 @@ input:focus {
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .file-label:hover {
     background-color: #303543;
     border-color: rgba(245, 158, 11, 0.55);
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
 }
 
 .file-status {
@@ -290,12 +274,10 @@ input:focus {
     cursor: pointer;
     padding: 6px 12px;
     border-radius: 6px;
-    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .file-clear-btn:hover {
     background-color: rgba(239, 68, 68, 0.24);
-    border-color: rgba(239, 68, 68, 0.5);
 }
 
 .file-upload-row.has-file .file-clear-btn {
@@ -314,12 +296,6 @@ input:focus {
     transform: translateY(-50%);
     pointer-events: none;
     opacity: 0.7;
-    transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.search-box:focus-within .search-icon {
-    opacity: 1;
-    transform: translateY(-50%) scale(1.1);
 }
 
 .search-box input {
@@ -341,7 +317,6 @@ input:focus {
     opacity: 0.45;
 }
 
-/* Вся карточка кликабельна для быстрого открытия книги */
 .book-card {
     display: flex;
     flex-wrap: wrap;
@@ -356,26 +331,18 @@ input:focus {
     overflow: hidden;
     cursor: pointer;
     user-select: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    animation: cardSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: cardSlideIn 0.25s ease-out both;
     transition:
-        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.25s ease,
-        max-height 0.3s ease,
-        padding 0.3s ease,
-        margin 0.3s ease,
-        border-color 0.2s ease,
-        background-color 0.2s ease,
-        box-shadow 0.2s ease;
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        border-color 0.15s ease,
+        background-color 0.15s ease;
 }
 
 .book-card:hover {
     background-color: #262a34;
     border-color: rgba(245, 158, 11, 0.45);
     transform: translateY(-2px);
-    box-shadow: 
-        0 8px 20px rgba(0, 0, 0, 0.35),
-        0 0 18px rgba(245, 158, 11, 0.12);
 }
 
 .book-card:active {
@@ -383,49 +350,36 @@ input:focus {
 }
 
 .book-card.just-added {
-    animation: newCardPulse 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: newCardPulse 1.1s ease-out both;
 }
 
 .book-card.removing {
     opacity: 0;
-    transform: translateX(45px) scale(0.95);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: -10px;
-    border-width: 0;
+    transform: translateX(40px);
     pointer-events: none;
 }
 
 @keyframes cardSlideIn {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(0.98);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
 @keyframes newCardPulse {
     0% {
         opacity: 0;
-        transform: translateY(-14px) scale(0.96);
+        transform: translateY(-10px);
         border-color: #f59e0b;
-        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
-    }
-    35% {
-        opacity: 1;
-        transform: translateY(0) scale(1.01);
-        border-color: #f59e0b;
-        box-shadow: 0 0 26px rgba(245, 158, 11, 0.32);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
         border-color: #2f3340;
-        box-shadow: none;
     }
 }
 
@@ -495,17 +449,12 @@ input:focus {
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .read-btn:hover {
     background-color: rgba(245, 158, 11, 0.22);
     border-color: rgba(245, 158, 11, 0.55);
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.22);
-}
-
-.read-btn:active {
-    transform: scale(0.95);
 }
 
 .edit-btn {
@@ -520,17 +469,12 @@ input:focus {
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .edit-btn:hover {
     background-color: rgba(96, 165, 250, 0.22);
     border-color: rgba(96, 165, 250, 0.55);
-    box-shadow: 0 0 14px rgba(96, 165, 250, 0.22);
-}
-
-.edit-btn:active {
-    transform: scale(0.95);
 }
 
 .delete-btn {
@@ -545,17 +489,12 @@ input:focus {
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+    transition: background-color 0.15s, border-color 0.15s;
 }
 
 .delete-btn:hover {
     background-color: rgba(239, 68, 68, 0.22);
     border-color: rgba(239, 68, 68, 0.45);
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.2);
-}
-
-.delete-btn:active {
-    transform: scale(0.95);
 }
 
 .empty-state {
@@ -566,15 +505,13 @@ input:focus {
     border: 1px dashed #2e323b;
     border-radius: 10px;
     font-size: 14px;
-    animation: cardSlideIn 0.25s ease both;
 }
 
-/* Модальные окна (читалка, редактирование, подтверждение удаления) */
+/* Модальные окна без тяжелого GPU blur-фильтра */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(8, 9, 12, 0.82);
-    backdrop-filter: blur(6px);
+    background-color: rgba(9, 10, 14, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -582,7 +519,7 @@ input:focus {
     z-index: 100;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.24s ease;
+    transition: opacity 0.18s ease;
 }
 
 .modal-overlay.open {
@@ -600,13 +537,9 @@ input:focus {
     background-color: #181a20;
     border: 1px solid rgba(245, 158, 11, 0.35);
     border-radius: 16px;
-    box-shadow: 
-        0 25px 60px rgba(0, 0, 0, 0.8),
-        0 0 42px rgba(245, 158, 11, 0.14),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    transform: translateY(18px) scale(0.97);
-    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
     overflow: hidden;
+    contain: content;
 }
 
 .modal-window.edit-modal-window {
@@ -619,14 +552,6 @@ input:focus {
     max-width: 430px;
     height: auto;
     border-color: rgba(239, 68, 68, 0.4);
-    box-shadow: 
-        0 25px 60px rgba(0, 0, 0, 0.8),
-        0 0 38px rgba(239, 68, 68, 0.16),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.modal-overlay.open .modal-window {
-    transform: translateY(0) scale(1);
 }
 
 .modal-header {
@@ -660,7 +585,6 @@ input:focus {
     color: #fbbf24;
 }
 
-/* Панель настроек шрифта в шапке читалки */
 .reader-toolbar {
     display: flex;
     align-items: center;
@@ -686,7 +610,6 @@ input:focus {
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.15s, color 0.15s;
 }
 
 .tool-btn:hover {
@@ -709,7 +632,6 @@ input:focus {
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .modal-close-btn:hover {
@@ -718,13 +640,14 @@ input:focus {
     border-color: rgba(245, 158, 11, 0.45);
 }
 
-/* Экран чтения книги без вертикального скролла */
+/* Изолированная область текста: перерисовка страницы не затрагивает остальной DOM */
 .reader-stage {
     position: relative;
     flex: 1;
     display: flex;
     overflow: hidden;
     background-color: #191b22;
+    contain: strict;
 }
 
 .modal-body {
@@ -737,25 +660,10 @@ input:focus {
     white-space: pre-wrap;
     overflow-wrap: break-word;
     user-select: text;
-    transition: opacity 0.14s ease;
 }
 
 .modal-body.serif-font {
     font-family: Georgia, "Times New Roman", Times, serif;
-    letter-spacing: 0.15px;
-}
-
-.modal-body.page-turn {
-    animation: pageFade 0.18s ease-out;
-}
-
-@keyframes pageFade {
-    from {
-        opacity: 0.35;
-    }
-    to {
-        opacity: 1;
-    }
 }
 
 .modal-body.empty-content {
@@ -767,17 +675,15 @@ input:focus {
     text-align: center;
 }
 
-/* Боковые зоны быстрого перелистывания кликом */
 .page-tap-zone {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 12%;
+    width: 11%;
     min-width: 36px;
-    max-width: 72px;
+    max-width: 68px;
     cursor: pointer;
     z-index: 2;
-    transition: background-color 0.15s ease;
 }
 
 .page-tap-zone.left {
@@ -788,11 +694,6 @@ input:focus {
     right: 0;
 }
 
-.page-tap-zone:hover {
-    background-color: rgba(245, 158, 11, 0.03);
-}
-
-/* Полоса прогресса чтения */
 .reader-progress-track {
     height: 3px;
     width: 100%;
@@ -803,8 +704,7 @@ input:focus {
 .reader-progress-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #f59e0b, #ea580c);
-    transition: width 0.2s ease;
+    background-color: #f59e0b;
 }
 
 .modal-footer {
@@ -829,13 +729,11 @@ input:focus {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .page-btn:hover:not(:disabled) {
     background-color: #2f3340;
     border-color: rgba(245, 158, 11, 0.45);
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
 }
 
 .page-btn:disabled {
@@ -869,7 +767,6 @@ input.page-input {
     margin-left: 4px;
 }
 
-/* Форма внутри окна редактирования */
 .edit-form {
     padding: 22px 24px;
     display: flex;
@@ -899,7 +796,6 @@ input.page-input {
     border-top: 1px solid #2b2e37;
 }
 
-/* Окно подтверждения удаления */
 .confirm-body {
     padding: 24px;
     text-align: center;
@@ -915,7 +811,6 @@ input.page-input {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
 }
 
 .confirm-body h3 {
@@ -952,27 +847,18 @@ input.page-input {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 0 16px rgba(220, 38, 38, 0.3);
-    transition: background-color 0.15s, box-shadow 0.15s, transform 0.12s;
 }
 
 .confirm-delete-btn:hover {
     background-color: #ef4444;
-    box-shadow: 0 0 22px rgba(239, 68, 68, 0.5);
 }
 
-.confirm-delete-btn:active {
-    transform: scale(0.97);
-}
-
-/* Вкладка Info */
 .info-hero {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(234, 88, 12, 0.04));
     border: 1px solid rgba(245, 158, 11, 0.28);
     border-radius: 12px;
     padding: 20px 22px;
     margin-bottom: 18px;
-    box-shadow: 0 0 24px rgba(245, 158, 11, 0.08);
 }
 
 .info-hero h2 {
@@ -1001,22 +887,12 @@ input.page-input {
     border: 1px solid #2f3340;
     border-radius: 12px;
     padding: 18px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    animation: cardSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.info-card:nth-child(1) { animation-delay: 40ms; }
-.info-card:nth-child(2) { animation-delay: 90ms; }
-.info-card:nth-child(3) { animation-delay: 140ms; }
-.info-card:nth-child(4) { animation-delay: 190ms; }
-
 .info-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: rgba(245, 158, 11, 0.42);
-    box-shadow: 
-        0 10px 22px rgba(0, 0, 0, 0.35),
-        0 0 20px rgba(245, 158, 11, 0.12);
 }
 
 .info-card-header {
@@ -1068,13 +944,11 @@ input.page-input {
     font-size: 14px;
     font-weight: 500;
     z-index: 200;
-    box-shadow: 
-        0 12px 28px rgba(0, 0, 0, 0.55),
-        0 0 18px rgba(245, 158, 11, 0.14);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
     opacity: 0;
     transform: translateY(16px);
     pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .toast.visible {

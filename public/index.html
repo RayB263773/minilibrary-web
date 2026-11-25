@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css?v=8">
+    <link rel="stylesheet" href="/style.css?v=9">
     <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
 </head>
 <body>
@@ -95,7 +95,7 @@
                         <h3>Умная читалка без скролла</h3>
                     </div>
                     <p>
-                        Текст книги загружается по маршруту <code>GET /api/books/&lt;id&gt;</code> и мгновенно верстается ровно под высоту экрана с поддержкой настройки шрифта и перелистывания колесом мыши.
+                        Текст книги индексируется по смещениям символов без дублирования памяти и верстается строго под высоту окна с поддержкой настройки шрифта и перелистывания колесом мыши.
                     </p>
                 </div>
 
@@ -293,7 +293,8 @@
         let editingBookId = null;
         let editedFileContent = "";
 
-        // Состояние читалки
+        // Состояние читалки: храним только индексные границы страниц [{start, end}] без копий строк
+        const bookContentCache = new Map();
         let rawBookText = "";
         let currentPages = [];
         let currentPageIndex = 0;
@@ -301,12 +302,12 @@
         let readerFontSize = Number(localStorage.getItem("minilib_font_size")) || 17;
         let readerFontFamily = localStorage.getItem("minilib_font_family") || "sans";
         let wheelCooldown = false;
+        let resizeTimer = null;
 
         let currentCount = 0;
         let toastTimer = null;
         let searchTimer = null;
 
-        // Применяем сохраненные настройки шрифта читалки
         function applyReaderTypography() {
             readerBody.style.fontSize = `${readerFontSize}px`;
             if (readerFontFamily === "serif") {
@@ -321,7 +322,6 @@
         }
         applyReaderTypography();
 
-        // Универсальная функция декодирования .txt файлов (UTF-8 и Windows-1251)
         async function decodeTextFile(file) {
             const buffer = await file.arrayBuffer();
             try {
@@ -333,7 +333,6 @@
             }
         }
 
-        // Загрузка файла в форме создания
         fileInput.addEventListener("change", async () => {
             const file = fileInput.files[0];
             if (!file) return;
@@ -369,7 +368,6 @@
 
         fileClearBtn.addEventListener("click", () => clearFileSelection(true));
 
-        // Загрузка файла в модальном окне редактирования
         editFileInput.addEventListener("change", async () => {
             const file = editFileInput.files[0];
             if (!file) return;
@@ -431,6 +429,7 @@
             });
 
             if (editedFileContent.length > 0) {
+                bookContentCache.delete(editingBookId);
                 localStorage.removeItem(`minilib_ratio_${editingBookId}`);
             }
 
@@ -440,7 +439,6 @@
             await loadBooks(false);
         });
 
-        // Модальное окно подтверждения удаления
         function openDeleteModal(book, cardElement) {
             pendingDeleteBook = book;
             pendingDeleteCardEl = cardElement;
@@ -474,6 +472,7 @@
                 method: "DELETE"
             });
 
+            bookContentCache.delete(bookToDelete.id);
             localStorage.removeItem(`minilib_ratio_${bookToDelete.id}`);
 
             setTimeout(() => {
@@ -485,17 +484,17 @@
                     const currentQuery = document.querySelector("#search").value.trim();
                     renderEmptyState(currentQuery);
                 }
-            }, 280);
+            }, 220);
         });
 
-        // Быстрая O(N) разбивка текста строго под размер экрана без вертикального скролла
+        // Сверхбыстрая индексация страниц без создания промежуточных строк (.slice) в цикле
         function paginateTextForScreen(text) {
-            const clean = text.replace(/\r\n/g, "\n").replace(/\t/g, "    ").trim();
-            if (!clean) return [];
+            const len = text.length;
+            if (len === 0) return [];
 
-            const style = window.getComputedStyle(readerBody);
-            const padX = (parseFloat(style.paddingLeft) || 36) + (parseFloat(style.paddingRight) || 36);
-            const padY = (parseFloat(style.paddingTop) || 24) + (parseFloat(style.paddingBottom) || 24);
+            const isMobile = window.innerWidth <= 680;
+            const padX = isMobile ? 44 : 88;
+            const padY = isMobile ? 40 : 56;
 
             const availWidth = Math.max(220, (readerBody.clientWidth || 640) - padX);
             const availHeight = Math.max(200, (readerBody.clientHeight || 480) - padY);
@@ -507,10 +506,11 @@
 
             const pages = [];
             let pos = 0;
-            const len = clean.length;
 
             while (pos < len) {
-                while (pos < len && (clean[pos] === "\n" || clean[pos] === " ")) {
+                while (pos < len) {
+                    const code = text.charCodeAt(pos);
+                    if (code !== 32 && code !== 10 && code !== 13 && code !== 9) break;
                     pos++;
                 }
                 if (pos >= len) break;
@@ -519,46 +519,56 @@
                 let pageEnd = pos;
 
                 while (pageEnd < len && linesUsed < maxLinesPerPage) {
-                    const sliceEnd = Math.min(len, pageEnd + charsPerLine + 1);
-                    const chunk = clean.slice(pageEnd, sliceEnd);
-                    const newlineIdx = chunk.indexOf("\n");
+                    const lineLimit = Math.min(len, pageEnd + charsPerLine);
+                    let newlinePos = -1;
 
-                    if (newlineIdx !== -1 && newlineIdx <= charsPerLine) {
-                        pageEnd += newlineIdx + 1;
-                        linesUsed += 1;
-                    } else if (sliceEnd === len) {
-                        pageEnd = len;
-                        linesUsed += 1;
-                    } else {
-                        let spaceIdx = chunk.lastIndexOf(" ", charsPerLine);
-                        if (spaceIdx <= 0) {
-                            spaceIdx = charsPerLine;
+                    for (let i = pageEnd; i < lineLimit; i++) {
+                        if (text.charCodeAt(i) === 10) {
+                            newlinePos = i;
+                            break;
                         }
-                        pageEnd += spaceIdx + (chunk[spaceIdx] === " " ? 1 : 0);
-                        linesUsed += 1;
+                    }
+
+                    if (newlinePos !== -1) {
+                        pageEnd = newlinePos + 1;
+                        linesUsed++;
+                    } else if (lineLimit === len) {
+                        pageEnd = len;
+                        linesUsed++;
+                    } else {
+                        let spacePos = -1;
+                        for (let i = lineLimit; i > pageEnd; i--) {
+                            const c = text.charCodeAt(i);
+                            if (c === 32 || c === 9) {
+                                spacePos = i;
+                                break;
+                            }
+                        }
+                        if (spacePos !== -1) {
+                            pageEnd = spacePos + 1;
+                        } else {
+                            pageEnd = lineLimit;
+                        }
+                        linesUsed++;
                     }
                 }
 
-                const pageText = clean.slice(pos, pageEnd).trimEnd();
-                if (pageText.length > 0) {
-                    pages.push(pageText);
+                if (pageEnd > pos) {
+                    pages.push({ start: pos, end: pageEnd });
+                    pos = pageEnd;
+                } else {
+                    break;
                 }
-                pos = pageEnd;
             }
 
             return pages;
         }
 
-        function renderCurrentPage(animate = true) {
+        function renderCurrentPage() {
             if (currentPages.length === 0) return;
 
-            if (animate) {
-                readerBody.classList.remove("page-turn");
-                void readerBody.offsetWidth;
-                readerBody.classList.add("page-turn");
-            }
-
-            readerBody.textContent = currentPages[currentPageIndex];
+            const range = currentPages[currentPageIndex];
+            readerBody.textContent = rawBookText.slice(range.start, range.end).trimEnd();
 
             const total = currentPages.length;
             const current = currentPageIndex + 1;
@@ -588,7 +598,7 @@
                 currentPages.length - 1,
                 Math.max(0, Math.round(oldRatio * (currentPages.length - 1)))
             );
-            renderCurrentPage(false);
+            renderCurrentPage();
         }
 
         fontDecBtn.addEventListener("click", () => {
@@ -624,9 +634,9 @@
         });
 
         window.addEventListener("resize", () => {
-            if (readerModal.classList.contains("open") && rawBookText) {
-                repaginatePreservingPosition();
-            }
+            if (!readerModal.classList.contains("open") || !rawBookText) return;
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(repaginatePreservingPosition, 150);
         });
 
         async function openReader(book) {
@@ -642,9 +652,14 @@
             readerProgress.style.width = "0%";
             readerModal.classList.add("open");
 
-            const response = await fetch(`/api/books/${book.id}`);
-            const data = await response.json();
-            rawBookText = data.content || "";
+            if (bookContentCache.has(book.id)) {
+                rawBookText = bookContentCache.get(book.id);
+            } else {
+                const response = await fetch(`/api/books/${book.id}`);
+                const data = await response.json();
+                rawBookText = (data.content || "").replace(/\r\n/g, "\n").trim();
+                bookContentCache.set(book.id, rawBookText);
+            }
 
             currentPages = paginateTextForScreen(rawBookText);
 
@@ -662,7 +677,7 @@
                 currentPages.length - 1,
                 Math.max(0, Math.round(savedRatio * (currentPages.length - 1)))
             );
-            renderCurrentPage(false);
+            renderCurrentPage();
         }
 
         function closeReader() {
@@ -672,14 +687,14 @@
         function goPrevPage() {
             if (currentPageIndex > 0) {
                 currentPageIndex--;
-                renderCurrentPage(true);
+                renderCurrentPage();
             }
         }
 
         function goNextPage() {
             if (currentPageIndex < currentPages.length - 1) {
                 currentPageIndex++;
-                renderCurrentPage(true);
+                renderCurrentPage();
             }
         }
 
@@ -688,20 +703,19 @@
         tapLeft.addEventListener("click", goPrevPage);
         tapRight.addEventListener("click", goNextPage);
 
-        // Перелистывание страниц колесом мыши без скролла
         readerModal.addEventListener("wheel", (event) => {
             if (!readerModal.classList.contains("open") || currentPages.length === 0) return;
             event.preventDefault();
             if (wheelCooldown) return;
 
-            if (event.deltaY > 12) {
+            if (event.deltaY > 10) {
                 goNextPage();
                 wheelCooldown = true;
-                setTimeout(() => { wheelCooldown = false; }, 160);
-            } else if (event.deltaY < -12) {
+                setTimeout(() => { wheelCooldown = false; }, 90);
+            } else if (event.deltaY < -10) {
                 goPrevPage();
                 wheelCooldown = true;
-                setTimeout(() => { wheelCooldown = false; }, 160);
+                setTimeout(() => { wheelCooldown = false; }, 90);
             }
         }, { passive: false });
 
@@ -709,7 +723,7 @@
             if (currentPages.length === 0) return;
             const target = Number(pageInput.value) - 1;
             currentPageIndex = Math.min(Math.max(0, target), currentPages.length - 1);
-            renderCurrentPage(true);
+            renderCurrentPage();
         });
 
         readerCloseBtn.addEventListener("click", closeReader);
@@ -741,7 +755,6 @@
             }
         });
 
-        // Переключение вкладок "Каталог" и "Info"
         const tabButtons = document.querySelectorAll(".tab-btn");
         const tabPanels = {
             catalog: document.querySelector("#tab-catalog"),
@@ -812,10 +825,9 @@
                 if (highlightNewest && index === data.books.length - 1) {
                     item.classList.add("just-added");
                 } else {
-                    item.style.animationDelay = `${Math.min(index * 35, 250)}ms`;
+                    item.style.animationDelay = `${Math.min(index * 30, 200)}ms`;
                 }
 
-                // Клик по любому месту карточки открывает читалку
                 item.addEventListener("click", () => openReader(book));
 
                 const left = document.createElement("div");
@@ -850,7 +862,6 @@
                 yearBadge.className = "year-badge";
                 yearBadge.textContent = `${book.year} г.`;
 
-                // Кнопка "Читать"
                 const readBtn = document.createElement("button");
                 readBtn.type = "button";
                 readBtn.className = "read-btn";
@@ -871,7 +882,6 @@
                     openReader(book);
                 });
 
-                // Кнопка "Изменить"
                 const editBtn = document.createElement("button");
                 editBtn.type = "button";
                 editBtn.className = "edit-btn";
@@ -892,7 +902,6 @@
                     openEditModal(book);
                 });
 
-                // Кнопка "Удалить" с вызовом окна подтверждения
                 const deleteBtn = document.createElement("button");
                 deleteBtn.type = "button";
                 deleteBtn.className = "delete-btn";
