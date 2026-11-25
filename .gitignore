@@ -1,4 +1,12 @@
+# Сборка CMake и бинарные файлы
 /build/
 /minilibrary
 /compile-error.log
+
+# Секреты и переменные окружения
 .env
+
+# Настройки IDE и ОС
+.vscode/
+.idea/
+.DS_Store

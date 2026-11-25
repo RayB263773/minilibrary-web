@@ -1,0 +1,10 @@
+# Единый формат переносов строк LF для Linux и Docker
+* text=auto eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+CMakeLists.txt text eol=lf
+Dockerfile text eol=lf
+
+# Исключаем верстку из статистики языков GitHub, чтобы главным языком проекта был C++
+public/*.html linguist-vendored
+public/*.css linguist-vendored
