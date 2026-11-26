@@ -3,128 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minilibrary-Web</title>
-    <link rel="stylesheet" href="/style.css?v=9">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/books.png">
+    <meta name="theme-color" content="#0b0b11">
+    <title>MiniLibrary — твоя библиотека</title>
+    <link rel="stylesheet" href="/style.css?v=20261127-1">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="title-wrap">
-                <img width="42" height="42" src="https://img.icons8.com/fluency/48/books.png" alt="books">
-                <div>
-                    <h1>Mini Library</h1>
-                    <p class="subtitle">Личный каталог книг на C++ и PostgreSQL</p>
-                </div>
-            </div>
-
-            <div class="header-controls">
-                <nav class="tabs-nav">
-                    <button type="button" class="tab-btn active" data-tab="catalog">
-                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/library.png" alt="catalog">
-                        Каталог
-                    </button>
-                    <button type="button" class="tab-btn" data-tab="info">
-                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/9ca3af/info.png" alt="info">
-                        Info
-                    </button>
-                </nav>
-                <span id="book-count" class="count-badge">Книг: 0</span>
+    <div class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="#catalog" aria-label="MiniLibrary — главная">
+                <span class="brand-mark"><img src="https://img.icons8.com/fluency/48/books.png" alt=""></span>
+                <span class="brand-name">Mini<span>Library</span></span>
+            </a>
+            <nav class="top-nav" aria-label="Основная навигация">
+                <button type="button" class="tab-btn active" data-tab="catalog"><span class="nav-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/ffffff/books.png" alt=""></span> Библиотека</button>
+                <button type="button" class="tab-btn" data-tab="info"><span class="nav-icon info-glyph">i</span> Info</button>
+            </nav>
+            <div class="account-actions" id="account-actions">
+                <button type="button" class="account-btn" id="login-open">Войти</button>
+                <button type="button" class="primary-btn register-open" id="register-open">Регистрация</button>
+                <span class="user-chip" id="user-chip" hidden></span>
+                <button type="button" class="account-btn logout-btn" id="logout-btn" hidden>Выйти</button>
             </div>
         </header>
 
-        <!-- Вкладка 1: Каталог книг -->
-        <section id="tab-catalog" class="tab-panel active">
-            <form id="book-form" class="book-form">
-                <input id="name" placeholder="Название книги" required>
-                <input id="author" placeholder="Автор" required>
-                <input id="year" type="number" placeholder="Год" required>
-                <button type="submit" id="submit-btn" class="add-btn">
-                    <img width="16" height="16" src="https://img.icons8.com/fluency-systems-filled/20/ffffff/plus-math.png" alt="add">
-                    Добавить
-                </button>
-
-                <div id="file-upload-row" class="file-upload-row">
-                    <label for="book-file" class="file-label">
-                        <img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/upload--v1.png" alt="upload">
-                        Загрузить файл книги (.txt)
-                    </label>
-                    <input id="book-file" type="file" accept=".txt,.md" hidden>
-                    <span id="file-status" class="file-status">Файл не выбран (можно добавить книгу без текста)</span>
-                    <button type="button" id="file-clear" class="file-clear-btn">Сбросить ✕</button>
+        <aside class="sidebar">
+            <div class="sidebar-brand-art">
+                <div class="book-emblem"><img src="https://img.icons8.com/fluency/96/open-book.png" alt=""></div>
+                <h2>Твоя библиотека<span>.</span></h2>
+                <p>Собирай истории, к которым хочется возвращаться.</p>
+            </div>
+            <div class="sidebar-section-label">РАЗДЕЛЫ</div>
+            <nav class="side-nav" aria-label="Разделы библиотеки">
+                <button type="button" class="side-link active" data-library="public"><span class="side-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/f07835/globe.png" alt=""></span><span>Общая библиотека</span></button>
+                <button type="button" class="side-link" data-library="private"><span class="side-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/c4bdd0/user.png" alt=""></span><span>Личная библиотека</span></button>
+                <button type="button" class="side-link" data-tab="info"><span class="side-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/c4bdd0/info.png" alt=""></span><span>О проекте</span></button>
+            </nav>
+            <div class="sidebar-bottom">
+                <div class="stat-card">
+                    <span class="stat-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/f07835/combo-chart.png" alt=""></span>
+                    <div><small>Книг в разделе</small><strong id="sidebar-count">0</strong></div>
                 </div>
+                <div class="sidebar-note"><span class="note-line"></span><p>Читай. Открывай.<br>Развивайся.</p></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="tab-catalog" class="tab-panel active">
+                <section class="welcome-hero" id="welcome-hero" aria-roledescription="carousel" aria-label="О MiniLibrary">
+                    <div class="hero-slide active" data-slide="0" aria-hidden="false">
+                        <div class="hero-copy">
+                            <span class="eyebrow">ТВОЁ МЕСТО ДЛЯ ЧТЕНИЯ</span>
+                            <h1>Добро пожаловать<br>в <span>MiniLibrary</span></h1>
+                            <p>Открывай новые книги, сохраняй любимые<br class="desktop-break"> и читай с удовольствием.</p>
+                        </div>
+                    </div>
+                    <div class="hero-slide" data-slide="1" aria-hidden="true">
+                        <div class="hero-copy">
+                            <span class="eyebrow">ТВОЯ КОЛЛЕКЦИЯ — ТВОИ ПРАВИЛА</span>
+                            <h1>Все любимые книги<br><span>в одном месте</span></h1>
+                            <p>Создавай личную библиотеку и возвращайся<br class="desktop-break"> к историям, которые вдохновляют.</p>
+                        </div>
+                    </div>
+                    <div class="hero-slide" data-slide="2" aria-hidden="true">
+                        <div class="hero-copy">
+                            <span class="eyebrow">ВРЕМЯ ДЛЯ НОВОЙ ГЛАВЫ</span>
+                            <h1>Открой свою<br><span>следующую историю</span></h1>
+                            <p>Добавляй книги, загружай тексты<br class="desktop-break"> и читай в собственном ритме.</p>
+                        </div>
+                    </div>
+                    <div class="hero-controls" aria-label="Управление слайдами">
+                        <button type="button" class="hero-arrow hero-prev" aria-label="Предыдущий слайд">&#8249;</button>
+                        <div class="hero-dots">
+                            <button type="button" class="active" data-go-slide="0" aria-label="Слайд 1" aria-current="true"></button>
+                            <button type="button" data-go-slide="1" aria-label="Слайд 2" aria-current="false"></button>
+                            <button type="button" data-go-slide="2" aria-label="Слайд 3" aria-current="false"></button>
+                        </div>
+                        <button type="button" class="hero-arrow hero-next" aria-label="Следующий слайд">&#8250;</button>
+                    </div>
+                </section>
+
+                <div class="catalog-toolbar">
+                    <div class="library-switch" role="group" aria-label="Выбор библиотеки">
+                        <button type="button" class="library-tab active" data-library="public"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/ffffff/globe.png" alt=""> Общая библиотека</button>
+                        <button type="button" class="library-tab" data-library="private"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/c4bdd0/user.png" alt=""> Личная библиотека</button>
+                    </div>
+                    <div class="toolbar-search">
+                        <span class="search-symbol"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/a9a2b8/search.png" alt=""></span>
+                        <input id="search" placeholder="Поиск по названию, автору или жанру..." autocomplete="off">
+                    </div>
+                    <div class="sort-control"><span class="sort-icon"><img class="ui-icon" src="https://img.icons8.com/ios-glyphs/30/a9a2b8/sort.png" alt=""></span><select id="sort-books" aria-label="Сортировка"><option value="default">По порядку</option><option value="title">По названию</option><option value="author">По автору</option><option value="year-desc">Сначала новые</option><option value="year-asc">Сначала старые</option></select></div>
+                    <button type="button" class="primary-btn add-book-open" id="add-book-open"><img class="button-icon" src="https://img.icons8.com/ios-glyphs/30/ffffff/plus-math.png" alt=""> Добавить книгу</button>
+                </div>
+
+                <div class="section-heading">
+                    <div><span class="eyebrow" id="catalog-eyebrow">ОТКРЫТЫЙ КАТАЛОГ</span><h2 id="catalog-heading">Общая библиотека</h2></div>
+                    <span id="book-count" class="count-badge">0 книг</span>
+                </div>
+                <ul id="books" class="book-list"></ul>
+            </section>
+
+            <section id="tab-info" class="tab-panel">
+                <div class="info-hero">
+                    <span class="eyebrow">О ПРОЕКТЕ</span>
+                    <h2><img width="24" height="24" src="https://img.icons8.com/fluency/48/info.png" alt=""> MiniLibrary — пространство для чтения</h2>
+                    <p>Клиент-серверное приложение с полным циклом операций CRUD для управления личной библиотекой и комфортного чтения книг онлайн. Серверная часть написана на C++20 с использованием Crow и PostgreSQL.</p>
+                </div>
+                <div class="info-grid">
+                    <div class="info-card"><div class="info-card-header"><img width="24" height="24" src="https://img.icons8.com/fluency/48/code.png" alt=""><h3>Технологический стек</h3></div><ul><li><strong>Backend:</strong> C++20, Crow HTTP Framework</li><li><strong>База данных:</strong> PostgreSQL + <code>libpqxx</code></li><li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS</li></ul></div>
+                    <div class="info-card"><div class="info-card-header"><img width="24" height="24" src="https://img.icons8.com/fluency/48/database.png" alt=""><h3>Умная читалка без скролла</h3></div><p>Текст книги индексируется по смещениям символов без дублирования памяти и верстается строго под высоту окна. Есть настройка шрифта и перелистывание страниц.</p></div>
+                    <div class="info-card"><div class="info-card-header"><img width="24" height="24" src="https://img.icons8.com/fluency/48/api-settings.png" alt=""><h3>Маршруты REST API</h3></div><ul><li><code>GET /api/books</code> — список и поиск</li><li><code>GET /api/books/&lt;id&gt;</code> — текст книги</li><li><code>POST /api/books</code> — добавление</li><li><code>PUT /api/books/&lt;id&gt;</code> — редактирование</li><li><code>DELETE /api/books/&lt;id&gt;</code> — удаление</li></ul></div>
+                    <div class="info-card"><div class="info-card-header"><img width="24" height="24" src="https://img.icons8.com/fluency/48/shield.png" alt=""><h3>Надёжность и защита</h3></div><p>Подключение к БД задаётся через <code>DATABASE_URL</code>, пользовательские параметры SQL передаются через параметризованные запросы.</p></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="add-modal" class="modal-overlay">
+        <div class="modal-window edit-modal-window add-modal-window">
+            <div class="modal-header"><div class="modal-title-group"><span class="eyebrow">НОВАЯ ЗАПИСЬ</span><h2>Добавить книгу</h2><p class="modal-meta">Заполни информацию и при желании прикрепи текст</p></div><button type="button" id="add-close" class="modal-close-btn">✕</button></div>
+            <form id="book-form" class="edit-form book-form">
+                <div class="field-group"><label for="name">Название книги</label><input id="name" placeholder="Например, Мастер и Маргарита" required></div>
+                <div class="field-group"><label for="author">Автор</label><input id="author" placeholder="Имя автора" required></div>
+                <div class="field-group"><label for="year">Год издания</label><input id="year" type="number" placeholder="2024" required></div>
+                <div id="file-upload-row" class="file-upload-row"><label for="book-file" class="file-label"><img width="16" height="16" src="https://img.icons8.com/fluency-systems-regular/20/fbbf24/upload--v1.png" alt=""> Загрузить файл книги (.txt)</label><input id="book-file" type="file" accept=".txt,.md" hidden><span id="file-status" class="file-status">Файл не выбран — книгу можно добавить без текста</span><button type="button" id="file-clear" class="file-clear-btn">Сбросить ✕</button></div>
+                <div class="edit-actions"><button type="button" id="add-cancel" class="modal-close-btn">Отмена</button><button type="submit" id="submit-btn" class="add-btn"><img class="button-icon" src="https://img.icons8.com/ios-glyphs/30/ffffff/plus-math.png" alt=""> Добавить книгу</button></div>
             </form>
+        </div>
+    </div>
 
-            <div class="search-box">
-                <img class="search-icon" width="18" height="18" src="https://img.icons8.com/fluency-systems-regular/20/9ca3af/search--v1.png" alt="search">
-                <input id="search" placeholder="Поиск по названию или автору...">
-            </div>
-
-            <ul id="books" class="book-list"></ul>
-        </section>
-
-        <!-- Вкладка 2: Информация о проекте -->
-        <section id="tab-info" class="tab-panel">
-            <div class="info-hero">
-                <h2>
-                    <img width="24" height="24" src="https://img.icons8.com/fluency/48/info.png" alt="about">
-                    О веб-приложении Mini Library
-                </h2>
-                <p>
-                    Клиент-серверное приложение с полным циклом операций CRUD для управления личной библиотекой и комфортного чтения книг онлайн. 
-                    Серверная часть написана на C++20 с использованием микрофреймворка Crow и СУБД PostgreSQL.
-                </p>
-            </div>
-
-            <div class="info-grid">
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/code.png" alt="stack">
-                        <h3>Технологический стек</h3>
-                    </div>
-                    <ul>
-                        <li><strong>Backend:</strong> C++20, Crow HTTP Framework</li>
-                        <li><strong>База данных:</strong> PostgreSQL + драйвер <code>libpqxx</code></li>
-                        <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JS (Fetch + FileReader)</li>
-                    </ul>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/database.png" alt="architecture">
-                        <h3>Умная читалка без скролла</h3>
-                    </div>
-                    <p>
-                        Текст книги индексируется по смещениям символов без дублирования памяти и верстается строго под высоту окна с поддержкой настройки шрифта и перелистывания колесом мыши.
-                    </p>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/api-settings.png" alt="api">
-                        <h3>Маршруты REST API (CRUD)</h3>
-                    </div>
-                    <ul>
-                        <li><code>GET /api/books</code> — список и поиск книг</li>
-                        <li><code>GET /api/books/&lt;id&gt;</code> — подгрузка текста книги</li>
-                        <li><code>POST /api/books</code> — добавление книги и <code>.txt</code></li>
-                        <li><code>PUT /api/books/&lt;id&gt;</code> — редактирование книги</li>
-                        <li><code>DELETE /api/books/&lt;id&gt;</code> — удаление по ID</li>
-                    </ul>
-                </div>
-
-                <div class="info-card">
-                    <div class="info-card-header">
-                        <img width="24" height="24" src="https://img.icons8.com/fluency/48/shield.png" alt="security">
-                        <h3>Надежность и защита</h3>
-                    </div>
-                    <p>
-                        Конфигурация подключения к БД передается через переменную окружения <code>DATABASE_URL</code>, 
-                        а все пользовательские параметры проходят через <code>pqxx::params</code> для защиты от SQL-инъекций.
-                    </p>
-                </div>
-            </div>
-        </section>
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-window edit-modal-window auth-modal-window">
+            <div class="modal-header"><div class="modal-title-group"><span class="eyebrow">ТВОЁ ЛИЧНОЕ ПРОСТРАНСТВО</span><h2 id="auth-title">Войти в аккаунт</h2><p class="modal-meta">Сохраняй свою коллекцию книг</p></div><button type="button" id="auth-close" class="modal-close-btn">✕</button></div>
+            <form id="auth-form" class="edit-form"><div class="field-group"><label for="auth-username">Имя пользователя</label><input id="auth-username" autocomplete="username" minlength="3" required></div><div class="field-group"><label for="auth-password">Пароль</label><input id="auth-password" type="password" autocomplete="current-password" minlength="4" required></div><button type="submit" id="auth-submit" class="add-btn">Войти</button><p class="auth-switch-copy"><span id="auth-switch-hint">Впервые здесь?</span> <button type="button" id="auth-switch">Создать аккаунт</button></p></form>
+        </div>
     </div>
 
     <!-- Модальное окно умной читалки без вертикального скролла -->
@@ -422,11 +433,16 @@
                 content: editedFileContent
             };
 
-            await fetch(`/api/books/${editingBookId}`, {
+            const updateResponse = await fetch(`/api/books/${editingBookId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: requestHeaders(true),
                 body: JSON.stringify(updatedBook)
             });
+            if (!updateResponse.ok) {
+                editSubmitBtn.disabled = false;
+                showToast("Не удалось сохранить изменения");
+                return;
+            }
 
             if (editedFileContent.length > 0) {
                 bookContentCache.delete(editingBookId);
@@ -468,9 +484,14 @@
 
             cardEl.classList.add("removing");
 
-            await fetch(`/api/books/${bookToDelete.id}`, {
-                method: "DELETE"
+            const deleteResponse = await fetch(`/api/books/${bookToDelete.id}`, {
+                method: "DELETE", headers: requestHeaders()
             });
+            if (!deleteResponse.ok) {
+                cardEl.classList.remove("removing");
+                showToast("Не удалось удалить книгу");
+                return;
+            }
 
             bookContentCache.delete(bookToDelete.id);
             localStorage.removeItem(`minilib_ratio_${bookToDelete.id}`);
@@ -478,6 +499,7 @@
             setTimeout(() => {
                 cardEl.remove();
                 updateCounter(currentCount - 1);
+                document.querySelector("#sidebar-count").textContent = Math.max(0, currentCount).toLocaleString("ru-RU");
                 showToast(`Удалено: «${bookToDelete.name}»`);
 
                 if (list.children.length === 0) {
@@ -652,32 +674,46 @@
             readerProgress.style.width = "0%";
             readerModal.classList.add("open");
 
-            if (bookContentCache.has(book.id)) {
-                rawBookText = bookContentCache.get(book.id);
-            } else {
-                const response = await fetch(`/api/books/${book.id}`);
-                const data = await response.json();
-                rawBookText = (data.content || "").replace(/\r\n/g, "\n").trim();
-                bookContentCache.set(book.id, rawBookText);
-            }
+            try {
+                if (bookContentCache.has(book.id)) {
+                    rawBookText = bookContentCache.get(book.id);
+                } else {
+                    const response = await fetch(`/api/books/${book.id}`, { headers: requestHeaders(), signal: AbortSignal.timeout(15000) });
+                    if (!response.ok) {
+                        const details = await response.text().catch(() => "");
+                        throw new Error(details || `Не удалось загрузить книгу (HTTP ${response.status})`);
+                    }
+                    const data = await response.json();
+                    rawBookText = (data.content || "").replace(/\r\n/g, "\n").trim();
+                    bookContentCache.set(book.id, rawBookText);
+                }
 
-            currentPages = paginateTextForScreen(rawBookText);
+                currentPages = paginateTextForScreen(rawBookText);
 
-            if (currentPages.length === 0) {
-                readerBody.textContent = "Для этой книги файл с текстом пока не загружен.";
+                if (currentPages.length === 0) {
+                    readerBody.textContent = "Для этой книги текст пока не загружен. Ты можешь добавить его через редактирование книги.";
+                    readerBody.classList.add("empty-content");
+                    readerFooter.style.display = "none";
+                    readerProgress.style.width = "0%";
+                    return;
+                }
+
+                readerBody.classList.remove("empty-content");
+                readerFooter.style.display = "flex";
+
+                const savedRatio = parseFloat(localStorage.getItem(`minilib_ratio_${book.id}`)) || 0;
+                currentPageIndex = Math.min(
+                    currentPages.length - 1,
+                    Math.max(0, Math.round(savedRatio * (currentPages.length - 1)))
+                );
+                renderCurrentPage();
+            } catch (error) {
+                console.error("Ошибка открытия книги:", error);
+                readerBody.textContent = `Не удалось открыть книгу. ${error.message || "Проверь соединение с сервером и попробуй ещё раз."}`;
                 readerBody.classList.add("empty-content");
-                return;
+                readerFooter.style.display = "none";
+                readerProgress.style.width = "0%";
             }
-
-            readerBody.classList.remove("empty-content");
-            readerFooter.style.display = "flex";
-
-            const savedRatio = parseFloat(localStorage.getItem(`minilib_ratio_${book.id}`)) || 0;
-            currentPageIndex = Math.min(
-                currentPages.length - 1,
-                Math.max(0, Math.round(savedRatio * (currentPages.length - 1)))
-            );
-            renderCurrentPage();
         }
 
         function closeReader() {
@@ -734,6 +770,7 @@
         });
 
         document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") { closeAddModal(); document.querySelector("#auth-modal").classList.remove("open"); }
             if (deleteModal.classList.contains("open")) {
                 if (event.key === "Escape") closeDeleteModal();
                 if (event.key === "Enter") deleteConfirmBtn.click();
@@ -756,6 +793,7 @@
         });
 
         const tabButtons = document.querySelectorAll(".tab-btn");
+        document.querySelectorAll(".side-link[data-tab]").forEach((button) => button.addEventListener("click", () => document.querySelector(`.tab-btn[data-tab="${button.dataset.tab}"]`).click()));
         const tabPanels = {
             catalog: document.querySelector("#tab-catalog"),
             info: document.querySelector("#tab-info")
@@ -784,154 +822,210 @@
 
         function updateCounter(newCount) {
             currentCount = newCount;
-            countBadge.textContent = `Книг: ${currentCount}`;
+            countBadge.textContent = `${currentCount} ${currentCount === 1 ? "книга" : currentCount >= 2 && currentCount <= 4 ? "книги" : "книг"}`;
             countBadge.classList.remove("bump");
             void countBadge.offsetWidth;
             countBadge.classList.add("bump");
             setTimeout(() => countBadge.classList.remove("bump"), 260);
         }
 
+        let currentLibrary = "public";
+        let authToken = localStorage.getItem("minilib_token") || "";
+        let authUsername = localStorage.getItem("minilib_username") || "";
+        let cachedBooks = [];
+        let authMode = "login";
+
+        function requestHeaders(json = false) {
+            const headers = {};
+            if (json) headers["Content-Type"] = "application/json";
+            if (currentLibrary === "private" && authToken) headers.Authorization = `Bearer ${authToken}`;
+            return headers;
+        }
+
+        function updateAccountUI() {
+            const loggedIn = Boolean(authToken && authUsername);
+            document.querySelector("#login-open").hidden = loggedIn;
+            document.querySelector("#register-open").hidden = loggedIn;
+            document.querySelector("#user-chip").hidden = !loggedIn;
+            document.querySelector("#logout-btn").hidden = !loggedIn;
+            document.querySelector("#user-chip").textContent = loggedIn ? authUsername : "";
+        }
+
+        function setLibrary(mode) {
+            if (mode === "private" && !authToken) {
+                showToast("Войди в аккаунт, чтобы открыть личную библиотеку");
+                openAuthModal("login");
+                return;
+            }
+            currentLibrary = mode;
+            document.querySelectorAll("[data-library]").forEach((button) => {
+                button.classList.toggle("active", button.dataset.library === mode);
+            });
+            document.querySelector("#catalog-heading").textContent = mode === "public" ? "Общая библиотека" : "Личная библиотека";
+            document.querySelector("#catalog-eyebrow").textContent = mode === "public" ? "ОТКРЫТЫЙ КАТАЛОГ" : "ТВОЯ КОЛЛЕКЦИЯ";
+            document.querySelector("#add-book-open").classList.toggle("is-private", mode === "private");
+            document.querySelector("#search").value = "";
+            loadBooks();
+        }
+
+        document.querySelectorAll("[data-library]").forEach((button) => {
+            button.addEventListener("click", () => setLibrary(button.dataset.library));
+        });
+
+        function openAuthModal(mode = "login") {
+            authMode = mode;
+            document.querySelector("#auth-title").textContent = mode === "login" ? "Войти в аккаунт" : "Создать аккаунт";
+            document.querySelector("#auth-submit").textContent = mode === "login" ? "Войти" : "Зарегистрироваться";
+            document.querySelector("#auth-switch-hint").textContent = mode === "login" ? "Впервые здесь?" : "Уже есть аккаунт?";
+            document.querySelector("#auth-switch").textContent = mode === "login" ? "Создать аккаунт" : "Войти";
+            document.querySelector("#auth-password").value = "";
+            document.querySelector("#auth-modal").classList.add("open");
+        }
+        document.querySelector("#login-open").addEventListener("click", () => openAuthModal("login"));
+        document.querySelector("#register-open").addEventListener("click", () => openAuthModal("register"));
+        document.querySelector("#auth-close").addEventListener("click", () => document.querySelector("#auth-modal").classList.remove("open"));
+        document.querySelector("#auth-switch").addEventListener("click", () => openAuthModal(authMode === "login" ? "register" : "login"));
+        document.querySelector("#auth-modal").addEventListener("click", (event) => {
+            if (event.target.id === "auth-modal") document.querySelector("#auth-modal").classList.remove("open");
+        });
+
+        document.querySelector("#auth-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const submit = document.querySelector("#auth-submit");
+            submit.disabled = true;
+            const username = document.querySelector("#auth-username").value.trim();
+            const password = document.querySelector("#auth-password").value;
+            try {
+                const response = await fetch(`/api/${authMode === "login" ? "login" : "register"}`, {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                if (!response.ok) {
+                    const details = await response.text().catch(() => "");
+                    if (response.status === 404) {
+                        throw new Error("Сервер не распознаёт маршрут авторизации. Пересобери проект и перезапусти сервер (если используешь Docker — пересобери образ без кэша).");
+                    }
+                    throw new Error(details || `Ошибка авторизации (HTTP ${response.status})`);
+                }
+                const data = await response.json();
+                authToken = data.token;
+                authUsername = data.username || username;
+                localStorage.setItem("minilib_token", authToken);
+                localStorage.setItem("minilib_username", authUsername);
+                updateAccountUI();
+                document.querySelector("#auth-modal").classList.remove("open");
+                showToast(authMode === "login" ? "Вход выполнен" : "Аккаунт создан");
+                setLibrary("private");
+            } catch (error) {
+                showToast(error.message || "Не удалось выполнить вход");
+            } finally { submit.disabled = false; }
+        });
+
+        document.querySelector("#logout-btn").addEventListener("click", async () => {
+            try {
+                await fetch("/api/logout", { method: "POST", headers: { Authorization: `Bearer ${authToken}` } });
+            } catch (_) {}
+            authToken = ""; authUsername = "";
+            localStorage.removeItem("minilib_token");
+            localStorage.removeItem("minilib_username");
+            currentLibrary = "public";
+            updateAccountUI();
+            setLibrary("public");
+            showToast("Ты вышел из аккаунта");
+        });
+        updateAccountUI();
+
+        const addModal = document.querySelector("#add-modal");
+        function openAddModal() {
+            if (currentLibrary === "private" && !authToken) { openAuthModal("login"); return; }
+            addModal.classList.add("open");
+            setTimeout(() => document.querySelector("#name").focus(), 80);
+        }
+        function closeAddModal() { addModal.classList.remove("open"); }
+        document.querySelector("#add-book-open").addEventListener("click", openAddModal);
+        document.querySelector("#add-close").addEventListener("click", closeAddModal);
+        document.querySelector("#add-cancel").addEventListener("click", closeAddModal);
+        addModal.addEventListener("click", (event) => { if (event.target === addModal) closeAddModal(); });
+
         function renderEmptyState(query) {
             const empty = document.createElement("li");
             empty.className = "empty-state";
-            empty.textContent = query
-                ? "По вашему запросу ничего не найдено"
-                : "В библиотеке пока нет ни одной книги";
+            empty.innerHTML = `<div class="empty-book"><img src="https://img.icons8.com/ios/50/f07835/open-book.png" alt=""></div><h3>${query ? "Ничего не найдено" : "Пока здесь пусто"}</h3><p>${query ? "Попробуй изменить поисковый запрос" : "Добавь первую книгу, чтобы начать свою коллекцию"}</p>`;
             list.appendChild(empty);
         }
 
         async function loadBooks(highlightNewest = false) {
             const query = document.querySelector("#search").value.trim();
             const url = query ? `/api/books?q=${encodeURIComponent(query)}` : "/api/books";
-
             list.classList.add("searching");
-            const response = await fetch(url);
-            const data = await response.json();
-            list.classList.remove("searching");
+            try {
+                const response = await fetch(url, { headers: requestHeaders() });
+                if (!response.ok) throw new Error("Не удалось загрузить библиотеку");
+                const data = await response.json();
+                cachedBooks = data.books || [];
+                const sort = document.querySelector("#sort-books").value;
+                if (sort === "title") cachedBooks.sort((a,b) => a.name.localeCompare(b.name, "ru"));
+                if (sort === "author") cachedBooks.sort((a,b) => a.author.localeCompare(b.author, "ru"));
+                if (sort === "year-desc") cachedBooks.sort((a,b) => b.year-a.year);
+                if (sort === "year-asc") cachedBooks.sort((a,b) => a.year-b.year);
+                list.replaceChildren();
+                updateCounter(cachedBooks.length);
+                document.querySelector("#sidebar-count").textContent = cachedBooks.length.toLocaleString("ru-RU");
+                if (cachedBooks.length === 0) { renderEmptyState(query); return; }
 
-            list.replaceChildren();
-            updateCounter(data.books.length);
+                cachedBooks.forEach((book, index) => {
+                    const item = document.createElement("li");
+                    item.className = `book-card cover-${index % 4}`;
+                    if (highlightNewest && index === cachedBooks.length - 1) item.classList.add("just-added");
+                    else item.style.animationDelay = `${Math.min(index * 35, 210)}ms`;
 
-            if (data.books.length === 0) {
-                renderEmptyState(query);
-                return;
-            }
+                    const cover = document.createElement("div");
+                    cover.className = "book-cover";
+                    const coverMark = document.createElement("span");
+                    coverMark.className = "cover-mark";
+                    coverMark.textContent = "MINI LIBRARY";
+                    const coverTitle = document.createElement("span");
+                    coverTitle.className = "cover-title";
+                    coverTitle.textContent = book.name;
+                    const coverYear = document.createElement("span");
+                    coverYear.className = "cover-year";
+                    coverYear.textContent = `${book.year}`;
+                    cover.append(coverMark, coverTitle, coverYear);
 
-            data.books.forEach((book, index) => {
-                const item = document.createElement("li");
-                item.className = "book-card";
-                item.title = "Нажмите, чтобы открыть книгу";
+                    const details = document.createElement("div");
+                    details.className = "book-details";
+                    const title = document.createElement("h3");
+                    title.className = "book-title";
+                    title.textContent = book.name;
+                    const author = document.createElement("p");
+                    author.className = "book-author";
+                    author.textContent = book.author;
+                    details.append(title, author);
 
-                if (highlightNewest && index === data.books.length - 1) {
-                    item.classList.add("just-added");
-                } else {
-                    item.style.animationDelay = `${Math.min(index * 30, 200)}ms`;
-                }
-
-                item.addEventListener("click", () => openReader(book));
-
-                const left = document.createElement("div");
-                left.className = "book-left";
-
-                const icon = document.createElement("img");
-                icon.width = 32;
-                icon.height = 32;
-                icon.src = "https://img.icons8.com/fluency/48/book.png";
-                icon.alt = "book";
-
-                const details = document.createElement("div");
-                details.className = "book-details";
-
-                const title = document.createElement("p");
-                title.className = "book-title";
-                title.textContent = book.name;
-
-                const author = document.createElement("p");
-                author.className = "book-author";
-                author.textContent = book.author;
-
-                details.appendChild(title);
-                details.appendChild(author);
-                left.appendChild(icon);
-                left.appendChild(details);
-
-                const right = document.createElement("div");
-                right.className = "book-right";
-
-                const yearBadge = document.createElement("span");
-                yearBadge.className = "year-badge";
-                yearBadge.textContent = `${book.year} г.`;
-
-                const readBtn = document.createElement("button");
-                readBtn.type = "button";
-                readBtn.className = "read-btn";
-
-                const readIcon = document.createElement("img");
-                readIcon.width = 16;
-                readIcon.height = 16;
-                readIcon.src = "https://img.icons8.com/fluency-systems-regular/20/fbbf24/open-book--v1.png";
-                readIcon.alt = "read";
-
-                const readText = document.createElement("span");
-                readText.textContent = "Читать";
-
-                readBtn.appendChild(readIcon);
-                readBtn.appendChild(readText);
-                readBtn.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    openReader(book);
+                    const actions = document.createElement("div");
+                    actions.className = "book-actions";
+                    const readBtn = document.createElement("button");
+                    readBtn.type = "button"; readBtn.className = "read-btn";
+                    readBtn.innerHTML = `<img width="17" height="17" src="https://img.icons8.com/fluency-systems-regular/20/ffffff/open-book--v1.png" alt=""> Читать`;
+                    readBtn.addEventListener("click", (event) => { event.stopPropagation(); openReader(book); });
+                    const editBtn = document.createElement("button");
+                    editBtn.type = "button"; editBtn.className = "icon-action edit-btn"; editBtn.title = "Изменить";
+                    editBtn.innerHTML = `<img width="17" height="17" src="https://img.icons8.com/fluency-systems-regular/20/60a5fa/edit--v1.png" alt="Изменить">`;
+                    editBtn.addEventListener("click", (event) => { event.stopPropagation(); openEditModal(book); });
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.type = "button"; deleteBtn.className = "icon-action delete-btn"; deleteBtn.title = "Удалить";
+                    deleteBtn.innerHTML = `<img width="17" height="17" src="https://img.icons8.com/fluency-systems-regular/20/f87171/trash--v1.png" alt="Удалить">`;
+                    deleteBtn.addEventListener("click", (event) => { event.stopPropagation(); openDeleteModal(book, item); });
+                    actions.append(readBtn, editBtn, deleteBtn);
+                    item.append(cover, details, actions);
+                    item.addEventListener("click", () => openReader(book));
+                    list.appendChild(item);
                 });
-
-                const editBtn = document.createElement("button");
-                editBtn.type = "button";
-                editBtn.className = "edit-btn";
-
-                const editIcon = document.createElement("img");
-                editIcon.width = 16;
-                editIcon.height = 16;
-                editIcon.src = "https://img.icons8.com/fluency-systems-regular/20/60a5fa/edit--v1.png";
-                editIcon.alt = "edit";
-
-                const editText = document.createElement("span");
-                editText.textContent = "Изменить";
-
-                editBtn.appendChild(editIcon);
-                editBtn.appendChild(editText);
-                editBtn.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    openEditModal(book);
-                });
-
-                const deleteBtn = document.createElement("button");
-                deleteBtn.type = "button";
-                deleteBtn.className = "delete-btn";
-
-                const trashIcon = document.createElement("img");
-                trashIcon.width = 16;
-                trashIcon.height = 16;
-                trashIcon.src = "https://img.icons8.com/fluency-systems-regular/20/f87171/trash--v1.png";
-                trashIcon.alt = "delete";
-
-                const btnText = document.createElement("span");
-                btnText.textContent = "Удалить";
-
-                deleteBtn.appendChild(trashIcon);
-                deleteBtn.appendChild(btnText);
-
-                deleteBtn.addEventListener("click", (event) => {
-                    event.stopPropagation();
-                    openDeleteModal(book, item);
-                });
-
-                right.appendChild(yearBadge);
-                right.appendChild(readBtn);
-                right.appendChild(editBtn);
-                right.appendChild(deleteBtn);
-
-                item.appendChild(left);
-                item.appendChild(right);
-                list.appendChild(item);
-            });
+            } catch (error) {
+                list.replaceChildren();
+                const empty = document.createElement("li"); empty.className = "empty-state"; empty.textContent = error.message;
+                list.appendChild(empty);
+            } finally { list.classList.remove("searching"); }
         }
 
         const form = document.querySelector("#book-form");
@@ -948,18 +1042,26 @@
                 content: loadedFileContent
             };
 
-            await fetch("/api/books", {
+            const addResponse = await fetch("/api/books", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: requestHeaders(true),
                 body: JSON.stringify(book)
             });
+            if (!addResponse.ok) {
+                submitBtn.disabled = false;
+                showToast(await addResponse.text() || "Не удалось добавить книгу");
+                return;
+            }
 
             form.reset();
             clearFileSelection(false);
+            closeAddModal();
             submitBtn.disabled = false;
             showToast(`Добавлена книга «${book.name}»`);
             await loadBooks(true);
         });
+
+        document.querySelector("#sort-books").addEventListener("change", () => loadBooks(false));
 
         const searchInput = document.querySelector("#search");
         searchInput.addEventListener("input", () => {
@@ -968,6 +1070,51 @@
                 loadBooks(false);
             }, 180);
         });
+
+        // Карусель приветственного баннера: автопрокрутка + ручное управление.
+        const hero = document.querySelector("#welcome-hero");
+        if (hero) {
+            const slides = Array.from(hero.querySelectorAll(".hero-slide"));
+            const dots = Array.from(hero.querySelectorAll("[data-go-slide]"));
+            const prev = hero.querySelector(".hero-prev");
+            const next = hero.querySelector(".hero-next");
+            let activeSlide = 0;
+            let heroTimer = null;
+
+            function showHeroSlide(index, restartTimer = true) {
+                activeSlide = (index + slides.length) % slides.length;
+                slides.forEach((slide, i) => {
+                    const active = i === activeSlide;
+                    slide.classList.toggle("active", active);
+                    slide.setAttribute("aria-hidden", String(!active));
+                });
+                dots.forEach((dot, i) => {
+                    const active = i === activeSlide;
+                    dot.classList.toggle("active", active);
+                    dot.setAttribute("aria-current", String(active));
+                });
+                if (restartTimer) startHeroTimer();
+            }
+
+            function startHeroTimer() {
+                if (heroTimer) clearInterval(heroTimer);
+                heroTimer = setInterval(() => {
+                    if (!document.hidden && !hero.matches(":hover") && !hero.contains(document.activeElement)) {
+                        showHeroSlide(activeSlide + 1, false);
+                    }
+                }, 5500);
+            }
+
+            prev.addEventListener("click", () => showHeroSlide(activeSlide - 1));
+            next.addEventListener("click", () => showHeroSlide(activeSlide + 1));
+            dots.forEach((dot) => dot.addEventListener("click", () => showHeroSlide(Number(dot.dataset.goSlide))));
+            hero.addEventListener("mouseenter", () => { if (heroTimer) clearInterval(heroTimer); });
+            hero.addEventListener("mouseleave", startHeroTimer);
+            hero.addEventListener("focusin", () => { if (heroTimer) clearInterval(heroTimer); });
+            hero.addEventListener("focusout", startHeroTimer);
+            document.addEventListener("visibilitychange", () => { if (!document.hidden) startHeroTimer(); });
+            startHeroTimer();
+        }
 
         loadBooks();
     </script>
